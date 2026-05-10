@@ -1,68 +1,99 @@
 import uuid
-from typing import TYPE_CHECKING, Optional
-from sqlalchemy import String, Text, Integer, ForeignKey, CheckConstraint
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from typing import Optional
 
-from .base import Base
+from sqlalchemy.orm import Session
 
-if TYPE_CHECKING:
-    from .conversation import Conversation
+from app.models.message import Message
 
 
-class Message(Base):
+def add_message(
+    db: Session,
+    conversation_id: uuid.UUID,
+    role: str,
+    content: str,
+    token_count: Optional[int] = None,
+) -> Message:
     """
-    Individual message within a conversation.
-    These rows are reconstructed into the messages array sent to Groq on each turn:
-      [{"role": "system", "content": system_prompt}, 
-       {"role": "user",  "content": "..."},
-       {"role": "assistant", "content": "..."},
-       ...]
+    Inserts a single message row into the conversation.
 
-    token_count is stored so the backend can trim history intelligently
-    when approaching a model's context window limit.
+    Called twice per chat turn by handle_chat_turn():
+      1. Once for the user's incoming message (role='user')
+      2. Once for the LLM's response (role='assistant')
 
-    Sort always by created_at ASC to preserve conversation order.
+    token_count is optional here — it's populated by the inference layer
+    using count_tokens() before each call to add_message(). If the token
+    counter isn't available for some reason, None is stored and the history
+    trimmer will treat that message as zero tokens (safe fallback).
+
+    role must be one of: 'user', 'assistant', 'system'
+    The DB enforces this via a CheckConstraint on the messages table.
     """
+    message = Message(
+        conversation_id=conversation_id,
+        role=role,
+        content=content,
+        token_count=token_count,
+    )
+    db.add(message)
+    db.commit()
+    db.refresh(message)
+    return message
 
-    __tablename__ = "messages"
 
-    __table_args__ = (
-        CheckConstraint(
-            "role IN ('user', 'assistant', 'system')",
-            name="ck_messages_role",
-        ),
+def get_conversation_history(
+    db: Session,
+    conversation_id: uuid.UUID,
+) -> list[Message]:
+    """
+    Returns all messages in a conversation ordered by created_at ASC.
+
+    This is the exact list that gets passed to format_messages_for_groq()
+    in the inference service. Order matters — the LLM must see the
+    conversation in chronological sequence or the context will be incoherent.
+
+    The ordering is also enforced at the ORM level via the relationship's
+    order_by on the Conversation model, but this function applies it
+    explicitly at the query level for safety when loading messages directly.
+    """
+    return (
+        db.query(Message)
+        .filter(Message.conversation_id == conversation_id)
+        .order_by(Message.created_at.asc())
+        .all()
     )
 
-    conversation_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("conversations.id", ondelete="CASCADE"),
-        nullable=False,
-        index=True,
-    )
 
-    role: Mapped[str] = mapped_column(
-        String(20),
-        nullable=False,
-        comment="'user', 'assistant', or 'system'",
-    )
+def get_message_by_id(
+    db: Session,
+    message_id: uuid.UUID,
+) -> Message | None:
+    """
+    Fetches a single message by its ID.
+    Not used in the core chat flow, but useful for testing and for any
+    future endpoints that need to reference individual messages (e.g. reactions,
+    editing, or regenerating a specific response).
+    """
+    return db.query(Message).filter(Message.id == message_id).first()
 
-    content: Mapped[str] = mapped_column(
-        Text,
-        nullable=False,
-    )
 
-    token_count: Mapped[Optional[int]] = mapped_column(
-        Integer,
-        nullable=True,
-        comment="Approximate token count for context window management",
-    )
+def get_last_user_message(
+    db: Session,
+    conversation_id: uuid.UUID,
+) -> Message | None:
+    """
+    Returns the most recent user message in a conversation.
 
-    # Relationship
-    conversation: Mapped["Conversation"] = relationship(
-        "Conversation",
-        back_populates="messages",
+    Used by handle_chat_turn() to auto-generate the conversation title
+    after the first turn — the title is derived from the first user
+    message content. Fetching it here avoids passing the raw string
+    through multiple layers.
+    """
+    return (
+        db.query(Message)
+        .filter(
+            Message.conversation_id == conversation_id,
+            Message.role == "user",
+        )
+        .order_by(Message.created_at.asc())
+        .first()
     )
-
-    def __repr__(self) -> str:
-        return f"<Message id={self.id} role={self.role} conversation_id={self.conversation_id}>"
