@@ -1,24 +1,53 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.core.config import settings
 from app.core.dependencies import get_current_user
 from app.models.user import User
 from app.crud.conversation import get_conversation_by_id
 from app.schemas.message import ChatRequest, ChatResponse
 from app.services.conversation_service import handle_chat_turn
+from app.main import limiter
 
 router = APIRouter(prefix="/conversations", tags=["messages"])
 
+
+# ─── STEP 5.2 — OWNERSHIP ENFORCEMENT ────────────────────────────────────────
+
+def assert_conversation_ownership(
+    conversation,
+    user_id: uuid.UUID,
+) -> None:
+    """
+    Reusable ownership guard for conversation resources.
+
+    Raises 403 if the conversation does not belong to the given user.
+    Called before any read or mutating operation on a specific conversation.
+
+    Design rule: always call get_conversation_or_404() BEFORE this function.
+    404 must come before 403 — never reveal whether a resource exists
+    to a user who doesn't own it.
+    """
+    if conversation.user_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have access to this conversation",
+        )
+
+
+# ─── STEP 5.3 — RATE LIMITED CHAT ROUTE ──────────────────────────────────────
 
 @router.post(
     "/{conversation_id}/messages",
     response_model=ChatResponse,
     status_code=status.HTTP_200_OK,
 )
+@limiter.limit(settings.CHAT_RATE_LIMIT)
 def send_message(
+    request: Request,           # Required by slowapi — must be first param
     conversation_id: uuid.UUID,
     payload: ChatRequest,
     db: Session = Depends(get_db),
@@ -27,36 +56,26 @@ def send_message(
     """
     Sends a user message to a conversation and returns the LLM's response.
 
-    This is the core endpoint of the entire application — every chat turn
-    flows through here.
+    Rate limited to settings.CHAT_RATE_LIMIT (default: 20 requests/minute
+    per IP). Exceeding the limit returns a 429 with a JSON error body.
 
     Flow:
-      1. Verify the conversation exists and belongs to the current user.
-      2. Hand off to handle_chat_turn() which runs the full inference
-         pipeline: save user message → trim history → call Groq →
-         save assistant response → bump updated_at → set title.
-      3. Return the assistant response so the frontend can render it
-         immediately without a second GET.
-
-    Ownership is checked here at the route layer before any DB writes
-    happen. handle_chat_turn() trusts that the caller has already
-    validated ownership — it does not re-check.
-
-    Returns:
-        ChatResponse — {"role": "assistant", "content": "<response>"}
+      1. Rate limit check (slowapi, before any logic runs)
+      2. Verify conversation exists → 404 if not
+      3. Verify conversation belongs to current user → 403 if not
+      4. Run inference pipeline via handle_chat_turn()
+      5. Return assistant response
 
     Raises:
-        401 — no token or invalid token (handled by get_current_user)
+        401 — missing or invalid JWT (get_current_user)
         403 — conversation belongs to a different user
         404 — conversation not found or closed
-        422 — blank message content (handled by ChatRequest validator)
+        422 — blank or invalid message content (ChatRequest validator)
+        429 — rate limit exceeded
         502 — Groq API error
         500 — unexpected server error
     """
-    # ── Ownership check ───────────────────────────────────────────────────────
-    # Fetch the conversation first to verify it exists and is owned by the
-    # current user. 404 before 403 — don't reveal whether the resource
-    # exists to users who don't own it.
+    # ── 404 check ─────────────────────────────────────────────────────────────
     conversation = get_conversation_by_id(db, conversation_id)
     if not conversation:
         raise HTTPException(
@@ -64,15 +83,10 @@ def send_message(
             detail="Conversation not found",
         )
 
-    if conversation.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have access to this conversation",
-        )
+    # ── 403 check (Step 5.2) ──────────────────────────────────────────────────
+    assert_conversation_ownership(conversation, current_user.id)
 
     # ── Inference pipeline ────────────────────────────────────────────────────
-    # payload.content is already stripped and validated non-blank by
-    # ChatRequest.content_must_not_be_blank. Pass it directly.
     assistant_response = handle_chat_turn(
         db=db,
         conversation_id=conversation_id,

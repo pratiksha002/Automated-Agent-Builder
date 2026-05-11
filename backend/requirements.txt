@@ -1,2 +1,4 @@
 groq
 tiktoken
+alembic
+slowapi
