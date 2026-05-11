@@ -1,0 +1,105 @@
+.create-page .main {
+    max-width: 680px;
+}
+
+.form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.form-card .form-group label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    display: block;
+    margin-bottom: 6px;
+}
+
+.form-card .form-group small {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    margin-top: 6px;
+}
+
+.form-card textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.tool-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color var(--transition), background var(--transition);
+    font-size: 13px;
+    font-family: var(--font-mono);
+    user-select: none;
+}
+
+.tool-checkbox:hover {
+    border-color: var(--border-hi);
+    background: var(--bg);
+}
+
+.tool-checkbox input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+.tool-checkbox.checked {
+    border-color: var(--accent-dim);
+    background: #141f00;
+    color: var(--accent);
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+}
+
+.form-actions .btn {
+    min-width: 120px;
+    justify-content: center;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    margin-bottom: 24px;
+    cursor: pointer;
+    transition: color var(--transition);
+}
+
+.back-link:hover {
+    color: var(--text);
+}
