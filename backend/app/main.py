@@ -4,16 +4,16 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
+
 
 from app.api.v1.router import router as v1_router
 from app.core.config import settings
 from app.db.seed import run_seed
 from app.db.session import SessionLocal, create_all_tables
 from app.models import Agent, AgentTool, APIKey, Conversation, Message, Model, User
-
+from slowapi import _rate_limit_exceeded_handler
+from app.core.limiter import limiter
 # ─── STEP 5.5 — LOGGING SETUP ────────────────────────────────────────────────
 # Configured before anything else so every module that calls
 # logging.getLogger(__name__) at import time inherits this config.
@@ -31,7 +31,6 @@ logger = logging.getLogger(__name__)
 # get_remote_address is the default key function — limits are per client IP.
 # For authenticated endpoints, swap to a user-ID key function in a future pass.
 
-limiter = Limiter(key_func=get_remote_address)
 
 
 # ─── APP INIT ─────────────────────────────────────────────────────────────────

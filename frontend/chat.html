@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat — Agent Builder</title>
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/chat.css" />
+</head>
+<body>
+  <div class="chat-layout">
+
+    <!-- ── Navbar ── -->
+    <nav class="navbar">
+      <div class="navbar-logo">Agent<span>Builder</span></div>
+      <div class="navbar-right">
+        <button class="btn btn-ghost" onclick="window.location.href='/dashboard.html'">
+          ← Dashboard
+        </button>
+        <button class="btn btn-ghost" id="logout-btn">Log out</button>
+      </div>
+    </nav>
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-title">Conversations</span>
+        <button class="btn btn-ghost" id="new-chat-btn" style="padding:4px 10px;font-size:13px;">
+          + New
+        </button>
+      </div>
+      <div class="sidebar-list" id="sidebar-list">
+        <p class="sidebar-empty">Loading...</p>
+      </div>
+    </aside>
+
+    <!-- ── Chat Area ── -->
+    <div class="chat-area">
+
+      <!-- Header -->
+      <div class="chat-header">
+        <div>
+          <div class="chat-agent-name" id="chat-agent-name">Select an agent</div>
+          <div class="chat-agent-model" id="chat-agent-model"></div>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div id="chat-empty" class="chat-empty">
+        <div>
+          <div class="chat-empty-title">Start a conversation</div>
+          <p>Click "+ New" to begin chatting with this agent.</p>
+        </div>
+      </div>
+
+      <!-- Messages + Input (hidden until conversation is active) -->
+      <div id="chat-area-content" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+        <div class="messages" id="messages"></div>
+        <div class="chat-input-bar">
+          <textarea
+            id="chat-input"
+            placeholder="Type a message… (Enter to send, Shift+Enter for newline)"
+            rows="1"
+          ></textarea>
+          <button class="send-btn" id="send-btn" title="Send">↑</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="js/chat.js"></script>
+</body>
+</html>

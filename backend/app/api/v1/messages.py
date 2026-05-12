@@ -10,7 +10,7 @@ from app.models.user import User
 from app.crud.conversation import get_conversation_by_id
 from app.schemas.message import ChatRequest, ChatResponse
 from app.services.conversation_service import handle_chat_turn
-from app.main import limiter
+from app.core.limiter import limiter
 
 router = APIRouter(prefix="/conversations", tags=["messages"])
 

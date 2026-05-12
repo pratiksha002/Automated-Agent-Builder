@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Agent Builder</title>
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+  <div class="layout">
+
+    <!-- ── Navbar ── -->
+    <nav class="navbar">
+      <div class="navbar-logo">Agent<span>Builder</span></div>
+      <div class="navbar-right">
+        <span class="navbar-user" id="user-name"></span>
+        <button class="btn btn-ghost" onclick="window.location.href='/create-agent.html'">
+          + New Agent
+        </button>
+        <button class="btn btn-ghost" id="logout-btn">Log out</button>
+      </div>
+    </nav>
+
+    <!-- ── Main ── -->
+    <main class="main">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Your Agents</h1>
+          <p class="page-subtitle">Chat with platform agents or manage your own.</p>
+        </div>
+      </div>
+
+      <!-- Platform Agents -->
+      <div class="section">
+        <div class="section-label">Platform Agents</div>
+        <div class="agent-grid" id="platform-agents">
+          <p class="empty-state">Loading...</p>
+        </div>
+      </div>
+
+      <!-- User Agents -->
+      <div class="section">
+        <div class="section-label">My Agents</div>
+        <div class="agent-grid" id="user-agents">
+          <p class="empty-state">Loading...</p>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>

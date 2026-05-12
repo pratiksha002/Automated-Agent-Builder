@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Agent — Agent Builder</title>
+  <link rel="stylesheet" href="css/global.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/create-agent.css" />
+</head>
+<body>
+  <div class="layout create-page">
+
+    <!-- ── Navbar ── -->
+    <nav class="navbar">
+      <div class="navbar-logo">Agent<span>Builder</span></div>
+      <div class="navbar-right">
+        <button class="btn btn-ghost" id="logout-btn">Log out</button>
+      </div>
+    </nav>
+
+    <!-- ── Main ── -->
+    <main class="main">
+
+      <div class="back-link" id="back-btn">← Back to dashboard</div>
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">New Agent</h1>
+          <p class="page-subtitle">Configure your agent's identity and behaviour.</p>
+        </div>
+      </div>
+
+      <form class="form-card" id="create-agent-form" onsubmit="return false;">
+
+        <!-- Name -->
+        <div class="form-group">
+          <label for="agent-name">Agent Name</label>
+          <input
+            id="agent-name"
+            type="text"
+            placeholder="e.g. Support Bot, Research Assistant"
+            required
+          />
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label for="agent-description">Description <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+          <input
+            id="agent-description"
+            type="text"
+            placeholder="A short summary shown on the dashboard card"
+          />
+        </div>
+
+        <!-- System Prompt -->
+        <div class="form-group">
+          <label for="agent-system-prompt">System Prompt</label>
+          <textarea
+            id="agent-system-prompt"
+            placeholder="You are a helpful assistant that specialises in..."
+            required
+          ></textarea>
+          <small>This is injected as the first message to the model on every conversation.</small>
+        </div>
+
+        <!-- Model -->
+        <div class="form-group">
+          <label for="model-select">Model</label>
+          <select id="model-select">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <!-- Tools -->
+        <div class="form-group">
+          <label>Tools <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+          <div class="tools-grid" id="tools-grid">
+            <!-- Populated by JS -->
+          </div>
+          <small>Enable capabilities for this agent.</small>
+        </div>
+
+        <!-- Error -->
+        <p class="error-msg" id="form-error"></p>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost" id="back-btn-bottom"
+            onclick="window.location.href='/dashboard.html'">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary">Create Agent</button>
+        </div>
+
+      </form>
+    </main>
+  </div>
+
+  <script type="module" src="js/create-agent.js"></script>
+</body>
+</html>
