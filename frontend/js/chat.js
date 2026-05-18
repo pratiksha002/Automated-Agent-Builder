@@ -1,225 +1,441 @@
 import { api } from './api.js';
+import { toast, confirmDialog, relativeTime, formatTime } from './ui.js';
 
-if (!sessionStorage.getItem('token')) {
-    window.location.href = '/index.html';
-}
+if (!sessionStorage.getItem('token')) window.location.href = '/index.html';
 
-// ─── State ────────────────────────────────────────────────────────────────────
-let activeConversationId = null;
-let activeAgentId = sessionStorage.getItem('active_agent_id');
-let activeAgentName = sessionStorage.getItem('active_agent_name');
-let isSending = false;
+// ── State ─────────────────────────────────────────────────────────────────
+let activeCid    = null;
+let isSending    = false;
+let allConvs     = [];
+const agentId    = sessionStorage.getItem('active_agent_id');
+const agentName  = sessionStorage.getItem('active_agent_name') || 'Agent';
+const agentModel = sessionStorage.getItem('active_agent_model') || '';
 
-// ─── DOM ──────────────────────────────────────────────────────────────────────
-const sidebarList = document.getElementById('sidebar-list');
-const messagesEl = document.getElementById('messages');
-const chatInput = document.getElementById('chat-input');
-const sendBtn = document.getElementById('send-btn');
-const chatAgentName = document.getElementById('chat-agent-name');
-const newChatBtn = document.getElementById('new-chat-btn');
-const logoutBtn = document.getElementById('logout-btn');
-const chatEmptyEl = document.getElementById('chat-empty');
-const chatAreaContent = document.getElementById('chat-area-content');
+// ── DOM ───────────────────────────────────────────────────────────────────
+const sidebarList   = document.getElementById('sidebar-list');
+const searchInput   = document.getElementById('sidebar-search');
+const msgWrap       = document.getElementById('messages');
+const chatInput     = document.getElementById('chat-input');
+const sendBtn       = document.getElementById('send-btn');
+const charCountEl   = document.getElementById('char-count');
+const welcomeEl     = document.getElementById('chat-welcome');
+const chatContentEl = document.getElementById('chat-content');
+const newBtn        = document.getElementById('new-chat-btn');
+const headerName    = document.getElementById('chat-agent-name');
+const headerSub     = document.getElementById('chat-agent-sub');
+const startersEl    = document.getElementById('starters');
+const welcomeTitle  = document.getElementById('chat-welcome-title');
 
-logoutBtn?.addEventListener('click', () => {
-    sessionStorage.clear();
-    window.location.href = '/index.html';
+// ── Init header ───────────────────────────────────────────────────────────
+if (headerName)  headerName.textContent = agentName;
+if (headerSub)   headerSub.textContent  = agentModel;
+if (welcomeTitle) welcomeTitle.textContent = `Chat with ${agentName}`;
+
+document.getElementById('logout-btn')?.addEventListener('click', () => {
+  sessionStorage.clear(); window.location.href = '/index.html';
 });
 
-// ─── Set agent name in header ─────────────────────────────────────────────────
-if (chatAgentName && activeAgentName) {
-    chatAgentName.textContent = activeAgentName;
+// ── Greeting & agent-aware starters ──────────────────────────────────────
+const hour = new Date().getHours();
+const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+// Starters adapt based on agent name keywords
+function getStarters(name) {
+  const n = (name || '').toLowerCase();
+  if (n.includes('support') || n.includes('help'))
+    return [
+      'I have an issue I need help with.',
+      'Can you walk me through troubleshooting steps?',
+      'What kinds of problems can you solve?',
+      'How do I escalate an unresolved issue?',
+    ];
+  if (n.includes('code') || n.includes('dev') || n.includes('engineer'))
+    return [
+      'Review this code snippet for me.',
+      'What is the best way to structure a REST API?',
+      'Explain the difference between async and sync in Python.',
+      'Help me debug a function that returns unexpected output.',
+    ];
+  if (n.includes('research') || n.includes('data') || n.includes('analyst'))
+    return [
+      'Summarise the key findings from a topic for me.',
+      'What are the most important papers on transformer models?',
+      'Help me structure a research methodology.',
+      'Compare and contrast two approaches to a problem.',
+    ];
+  if (n.includes('write') || n.includes('content') || n.includes('copy'))
+    return [
+      'Write a short LinkedIn post about AI productivity.',
+      'Give me five headline ideas for a product launch.',
+      'Rewrite this paragraph to be more concise.',
+      'What makes a compelling product description?',
+    ];
+  if (n.includes('tutor') || n.includes('teach') || n.includes('learn'))
+    return [
+      'Explain this concept as if I\'m a beginner.',
+      'Give me a practice problem to test my understanding.',
+      'What are the most important fundamentals to master first?',
+      'Create a short study plan for me.',
+    ];
+  // Default
+  return [
+    'What can you help me with today?',
+    'Give me a quick overview of your capabilities.',
+    'Help me think through a complex problem.',
+    'What is the best way to get started?',
+  ];
 }
 
-// ─── Render a single message bubble ──────────────────────────────────────────
-function renderMessage(role, content) {
-    const wrapper = document.createElement('div');
-    wrapper.className = `message ${role}`;
-
-    const avatar = document.createElement('div');
-    avatar.className = 'message-avatar';
-    avatar.textContent = role === 'user' ? 'U' : 'AI';
-
-    const bubble = document.createElement('div');
-    bubble.className = 'message-bubble';
-    bubble.textContent = content;
-
-    wrapper.appendChild(avatar);
-    wrapper.appendChild(bubble);
-    messagesEl.appendChild(wrapper);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+// ── Render starters ───────────────────────────────────────────────────────
+if (startersEl) {
+  getStarters(agentName).forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'starter';
+    btn.textContent = s;
+    btn.addEventListener('click', () => {
+      chatInput.value = s;
+      chatInput.dispatchEvent(new Event('input'));
+      sendMessage();
+    });
+    startersEl.appendChild(btn);
+  });
 }
 
-// ─── Typing indicator ─────────────────────────────────────────────────────────
-function showTyping() {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'message assistant';
-    wrapper.id = 'typing-indicator';
-    wrapper.innerHTML = `
-    <div class="message-avatar">AI</div>
-    <div class="message-bubble">
-      <div class="typing-indicator">
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
+// Inject greeting message above starters
+const greetingEl = document.getElementById('chat-greeting');
+if (greetingEl) {
+  greetingEl.innerHTML = `
+    <span style="color:var(--text-3);font-size:13px;font-family:var(--font-mono)">${greeting}</span>
+    <h2 style="font-family:var(--font-display);font-size:24px;font-weight:800;letter-spacing:-0.03em;margin:6px 0 8px">
+      I'm <span style="color:var(--violet-2)">${agentName}</span>
+    </h2>
+    <p style="font-size:14px;color:var(--text-2);max-width:360px;line-height:1.6">
+      Ready to help. Pick a suggestion below or type your own question to get started.
+    </p>`;
+}
+
+// ── Markdown (CDN) ────────────────────────────────────────────────────────
+let markedReady = false;
+const ms = document.createElement('script');
+ms.src = 'https://cdn.jsdelivr.net/npm/marked@9/marked.min.js';
+ms.onload = () => { window.marked.setOptions({ breaks: true, gfm: true }); markedReady = true; };
+document.head.appendChild(ms);
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderMd(text) {
+  if (!markedReady || !window.marked) return escHtml(text).replace(/\n/g,'<br>');
+  let html = window.marked.parse(text);
+  html = html.replace(
+    /<pre><code(?: class="language-(\w+)")?>([\s\S]*?)<\/code><\/pre>/g,
+    (_, lang, code) => `
+      <pre>
+        <div class="code-header">
+          <span>${lang || 'code'}</span>
+          <button class="code-copy" data-code="${encodeURIComponent(code)}">Copy</button>
+        </div>
+        <code${lang ? ` class="language-${lang}"` : ''}>${code}</code>
+      </pre>`
+  );
+  return html;
+}
+
+function attachCodeCopy(el) {
+  el.querySelectorAll('.code-copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(decodeURIComponent(btn.dataset.code || '')).then(() => {
+        btn.textContent = 'Copied!'; btn.classList.add('done');
+        setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('done'); }, 2000);
+      });
+    });
+  });
+}
+
+// ── Render message bubble ─────────────────────────────────────────────────
+function renderMessage(role, content, ts = null) {
+  const wrap = document.createElement('div');
+  wrap.className = `msg ${role}`;
+  const timeStr = ts ? formatTime(ts) : formatTime(new Date().toISOString());
+  const initials = role === 'user' ? 'You' : 'AI';
+  const html = role === 'assistant' ? renderMd(content) : `<p>${escHtml(content)}</p>`;
+
+  wrap.innerHTML = `
+    <div class="msg-avatar">${initials}</div>
+    <div class="msg-content">
+      <div class="msg-bubble">${html}</div>
+      <div class="msg-actions">
+        <span class="msg-time">${timeStr}</span>
+        <button class="msg-act copy-btn" title="Copy message">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px">
+            <rect x="9" y="9" width="13" height="13" rx="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          Copy
+        </button>
       </div>
-    </div>
-  `;
-    messagesEl.appendChild(wrapper);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+    </div>`;
+
+  wrap.querySelector('.copy-btn').addEventListener('click', () => {
+    navigator.clipboard.writeText(content).then(() => {
+      const btn = wrap.querySelector('.copy-btn');
+      btn.textContent = 'Copied'; btn.classList.add('done');
+      setTimeout(() => {
+        btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy`;
+        btn.classList.remove('done');
+      }, 2000);
+    });
+  });
+
+  attachCodeCopy(wrap);
+  msgWrap.appendChild(wrap);
+  msgWrap.scrollTop = msgWrap.scrollHeight;
+  return wrap;
 }
 
-function hideTyping() {
-    document.getElementById('typing-indicator')?.remove();
+// ── Stream text word-by-word ──────────────────────────────────────────────
+async function streamInto(bubble, fullText) {
+  const words = fullText.split(' ');
+  let acc = '';
+  bubble.classList.add('streaming-cursor');
+  for (let i = 0; i < words.length; i++) {
+    acc += (i ? ' ' : '') + words[i];
+    bubble.innerHTML = markedReady && window.marked
+      ? window.marked.parse(acc)
+      : escHtml(acc).replace(/\n/g, '<br>');
+    msgWrap.scrollTop = msgWrap.scrollHeight;
+    await new Promise(r => setTimeout(r, words[i].length > 7 ? 20 : 13));
+  }
+  bubble.classList.remove('streaming-cursor');
+  bubble.innerHTML = renderMd(fullText);
+  attachCodeCopy(bubble);
+  msgWrap.scrollTop = msgWrap.scrollHeight;
 }
 
-// ─── Load conversation history ────────────────────────────────────────────────
-async function loadConversation(conversationId) {
-    activeConversationId = conversationId;
-    messagesEl.innerHTML = '';
+// ── Typing indicator ──────────────────────────────────────────────────────
+function showTyping() {
+  const el = document.createElement('div');
+  el.className = 'msg assistant'; el.id = 'typing';
+  el.innerHTML = `
+    <div class="msg-avatar">AI</div>
+    <div class="msg-content">
+      <div class="msg-bubble">
+        <div class="typing">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      </div>
+    </div>`;
+  msgWrap.appendChild(el);
+  msgWrap.scrollTop = msgWrap.scrollHeight;
+}
+function hideTyping() { document.getElementById('typing')?.remove(); }
 
-    // Mark active in sidebar
-    document.querySelectorAll('.sidebar-item').forEach(el => {
-        el.classList.toggle('active', el.dataset.id === conversationId);
+// ── Load conversation ─────────────────────────────────────────────────────
+async function loadConv(id) {
+  activeCid = id;
+  msgWrap.innerHTML = '';
+  document.querySelectorAll('.s-item').forEach(el =>
+    el.classList.toggle('active', el.dataset.id === id));
+  if (welcomeEl)     welcomeEl.style.display     = 'none';
+  if (chatContentEl) chatContentEl.style.display = 'flex';
+  try {
+    const conv = await api.conversations.get(id);
+    (conv.messages || [])
+      .filter(m => m.role !== 'system')
+      .forEach(m => renderMessage(m.role, m.content, m.created_at));
+    chatInput.focus();
+  } catch (err) { toast(err.message, 'error'); }
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────────────
+function renderSidebar(convs) {
+  sidebarList.innerHTML = '';
+  if (!convs.length) {
+    sidebarList.innerHTML = '<p class="sidebar-empty">No conversations yet.<br>Click + New to start one.</p>';
+    return;
+  }
+  convs.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 's-item' + (c.id === activeCid ? ' active' : '');
+    el.dataset.id = c.id;
+    el.innerHTML = `
+      <div class="s-item-indicator"></div>
+      <div class="s-item-body">
+        <div class="s-item-title">${escHtml(c.title || 'New conversation')}</div>
+        <div class="s-item-meta">${relativeTime(c.updated_at)}</div>
+      </div>
+      <button class="s-item-del" title="Delete conversation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          style="width:11px;height:11px;pointer-events:none">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>`;
+
+    el.addEventListener('click', e => {
+      if (e.target.closest('.s-item-del')) return;
+      loadConv(c.id);
     });
 
-    try {
-        const conv = await api.conversations.get(conversationId);
-        const messages = conv.messages || [];
+    el.querySelector('.s-item-del').addEventListener('click', async e => {
+      e.stopPropagation();
+      const ok = await confirmDialog(
+        'Delete conversation',
+        'This conversation and all its messages will be permanently deleted. This cannot be undone.'
+      );
+      if (!ok) return;
+      try {
+        await api.conversations.delete(c.id);
+        allConvs = allConvs.filter(x => x.id !== c.id);
+        if (activeCid === c.id) {
+          activeCid = null;
+          msgWrap.innerHTML = '';
+          if (welcomeEl)     welcomeEl.style.display     = 'flex';
+          if (chatContentEl) chatContentEl.style.display = 'none';
+        }
+        renderSidebar(filtered());
+        toast('Conversation deleted', 'success');
+      } catch (err) { toast(err.message, 'error'); }
+    });
 
-        if (chatEmptyEl) chatEmptyEl.style.display = 'none';
-        if (chatAreaContent) chatAreaContent.style.display = 'flex';
-
-        messages.forEach(m => {
-            if (m.role !== 'system') renderMessage(m.role, m.content);
-        });
-
-        chatInput.focus();
-    } catch (err) {
-        messagesEl.innerHTML = `<p style="color:var(--danger);font-size:13px;">${err.message}</p>`;
-    }
+    sidebarList.appendChild(el);
+  });
 }
 
-// ─── Load sidebar conversation list ──────────────────────────────────────────
-async function loadSidebar() {
-    try {
-        const conversations = await api.conversations.list();
-
-        // Filter to conversations with this agent
-        const filtered = activeAgentId
-            ? conversations.filter(c => c.agent_id === activeAgentId)
-            : conversations;
-
-        sidebarList.innerHTML = '';
-
-        if (filtered.length === 0) {
-            sidebarList.innerHTML = '<p class="sidebar-empty">No conversations yet.</p>';
-            return;
-        }
-
-        filtered.forEach(conv => {
-            const item = document.createElement('div');
-            item.className = 'sidebar-item';
-            item.dataset.id = conv.id;
-            item.innerHTML = `
-        <div class="sidebar-item-title">${conv.title || 'New conversation'}</div>
-        <div class="sidebar-item-meta">${new Date(conv.updated_at).toLocaleDateString()}</div>
-      `;
-            item.addEventListener('click', () => loadConversation(conv.id));
-            sidebarList.appendChild(item);
-        });
-
-        // Auto-load most recent
-        if (filtered.length > 0 && !activeConversationId) {
-            loadConversation(filtered[0].id);
-        }
-    } catch (err) {
-        sidebarList.innerHTML = `<p class="sidebar-empty">${err.message}</p>`;
-    }
+function filtered() {
+  const q = (searchInput?.value || '').trim().toLowerCase();
+  const base = agentId
+    ? allConvs.filter(c => c.agent_id === agentId)
+    : allConvs;
+  return q ? base.filter(c => (c.title || '').toLowerCase().includes(q)) : base;
 }
 
-// ─── New conversation ─────────────────────────────────────────────────────────
-newChatBtn?.addEventListener('click', async () => {
-    if (!activeAgentId) {
-        alert('No agent selected. Go back to the dashboard and click Chat on an agent.');
-        return;
+async function loadSidebar(autoFirst = false) {
+  try {
+    allConvs = await api.conversations.list();
+    renderSidebar(filtered());
+    if (autoFirst && !activeCid && filtered().length) {
+      loadConv(filtered()[0].id);
     }
-    try {
-        const conv = await api.conversations.create(activeAgentId);
-        activeConversationId = conv.id;
-        messagesEl.innerHTML = '';
-        if (chatEmptyEl) chatEmptyEl.style.display = 'none';
-        if (chatAreaContent) chatAreaContent.style.display = 'flex';
-        await loadSidebar();
-        loadConversation(conv.id);
-    } catch (err) {
-        alert(err.message);
-    }
+  } catch (err) {
+    sidebarList.innerHTML = `<p class="sidebar-empty">${escHtml(err.message)}</p>`;
+  }
+}
+
+searchInput?.addEventListener('input', () => renderSidebar(filtered()));
+
+// ── New chat ──────────────────────────────────────────────────────────────
+newBtn?.addEventListener('click', async () => {
+  if (!agentId) {
+    toast('No agent selected. Return to the dashboard.', 'error');
+    return;
+  }
+  try {
+    const c = await api.conversations.create(agentId);
+    activeCid = c.id;
+    msgWrap.innerHTML = '';
+    if (welcomeEl)     welcomeEl.style.display     = 'flex';
+    if (chatContentEl) chatContentEl.style.display = 'none';
+    await loadSidebar();
+    // Show greeting in the fresh welcome state
+    chatInput.focus();
+  } catch (err) { toast(err.message, 'error'); }
 });
 
-// ─── Send message ─────────────────────────────────────────────────────────────
+// ── Send message ──────────────────────────────────────────────────────────
 async function sendMessage() {
-    if (isSending) return;
-    const content = chatInput.value.trim();
-    if (!content) return;
+  if (isSending) return;
+  const content = chatInput.value.trim();
+  if (!content) return;
 
-    if (!activeConversationId) {
-        // Auto-create a conversation if none is active
-        if (!activeAgentId) {
-            alert('No agent selected.');
-            return;
-        }
-        try {
-            const conv = await api.conversations.create(activeAgentId);
-            activeConversationId = conv.id;
-            await loadSidebar();
-        } catch (err) {
-            alert(err.message);
-            return;
-        }
-    }
-
-    isSending = true;
-    sendBtn.disabled = true;
-    chatInput.value = '';
-    chatInput.style.height = 'auto';
-
-    if (chatEmptyEl) chatEmptyEl.style.display = 'none';
-    if (chatAreaContent) chatAreaContent.style.display = 'flex';
-
-    renderMessage('user', content);
-    showTyping();
-
+  // Create conversation on first message if none exists
+  if (!activeCid) {
+    if (!agentId) { toast('No agent selected.', 'error'); return; }
     try {
-        const response = await api.messages.send(activeConversationId, content);
-        hideTyping();
-        renderMessage('assistant', response.content);
-        // Refresh sidebar to update title
-        await loadSidebar();
-    } catch (err) {
-        hideTyping();
-        renderMessage('assistant', `Error: ${err.message}`);
-    } finally {
-        isSending = false;
-        sendBtn.disabled = false;
-        chatInput.focus();
-    }
+      const c = await api.conversations.create(agentId);
+      activeCid = c.id;
+      await loadSidebar();
+    } catch (err) { toast(err.message, 'error'); return; }
+  }
+
+  isSending = true;
+  sendBtn.disabled = true;
+  if (welcomeEl)     welcomeEl.style.display     = 'none';
+  if (chatContentEl) chatContentEl.style.display = 'flex';
+
+  chatInput.value = '';
+  chatInput.style.height = 'auto';
+  if (charCountEl) charCountEl.textContent = '0';
+
+  renderMessage('user', content);
+  showTyping();
+
+  try {
+    const res = await api.messages.send(activeCid, content);
+    hideTyping();
+
+    // Build assistant wrapper
+    const wrap = document.createElement('div');
+    wrap.className = 'msg assistant';
+    const now = new Date().toISOString();
+    wrap.innerHTML = `
+      <div class="msg-avatar">AI</div>
+      <div class="msg-content">
+        <div class="msg-bubble"></div>
+        <div class="msg-actions">
+          <span class="msg-time">${formatTime(now)}</span>
+          <button class="msg-act copy-btn" title="Copy message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px">
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Copy
+          </button>
+        </div>
+      </div>`;
+
+    wrap.querySelector('.copy-btn').addEventListener('click', () => {
+      navigator.clipboard.writeText(res.content).then(() => {
+        const btn = wrap.querySelector('.copy-btn');
+        btn.textContent = 'Copied'; btn.classList.add('done');
+        setTimeout(() => {
+          btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy`;
+          btn.classList.remove('done');
+        }, 2000);
+      });
+    });
+
+    msgWrap.appendChild(wrap);
+    await streamInto(wrap.querySelector('.msg-bubble'), res.content);
+    await loadSidebar();
+
+  } catch (err) {
+    hideTyping();
+    renderMessage('assistant', `Something went wrong: ${err.message}`);
+    toast(err.message, 'error');
+  } finally {
+    isSending = false;
+    sendBtn.disabled = false;
+    chatInput.focus();
+  }
 }
 
 sendBtn?.addEventListener('click', sendMessage);
-
-chatInput?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-    }
+chatInput?.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
 });
-
-// Auto-resize textarea
 chatInput?.addEventListener('input', () => {
-    chatInput.style.height = 'auto';
-    chatInput.style.height = Math.min(chatInput.scrollHeight, 140) + 'px';
+  chatInput.style.height = 'auto';
+  chatInput.style.height = Math.min(chatInput.scrollHeight, 160) + 'px';
+  const l = chatInput.value.length;
+  if (charCountEl) {
+    charCountEl.textContent = l;
+    charCountEl.className = 'char-count' + (l > 1800 ? ' warn' : '');
+  }
 });
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
-loadSidebar();
+// ── Init ──────────────────────────────────────────────────────────────────
+loadSidebar(true);

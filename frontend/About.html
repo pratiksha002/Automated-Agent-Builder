@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About — Agentive by DevNexus</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <link rel="stylesheet" href="css/landing.css"/>
+  <link rel="stylesheet" href="css/pages.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
+  <style>
+    .team-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:14px; margin-top:32px; }
+    .team-card { background:var(--ink-2); border:1px solid var(--line); border-radius:var(--r-xl); padding:28px 24px; text-align:center; transition:all var(--t-slow) var(--ease); }
+    .team-card:hover { border-color:rgba(124,109,240,0.35); transform:translateY(-4px); box-shadow:0 16px 48px rgba(0,0,0,0.45); }
+    .team-avatar { width:64px; height:64px; border-radius:50%; margin:0 auto 16px; display:grid; place-items:center; font-family:var(--font-display); font-size:20px; font-weight:800; border:1px solid var(--line-hi); }
+    .team-name { font-family:var(--font-display); font-size:16px; font-weight:700; margin-bottom:4px; }
+    .team-role { font-size:11px; color:var(--violet-2); font-family:var(--font-mono); font-weight:600; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px; }
+    .team-bio { font-size:13px; color:var(--text-2); line-height:1.6; }
+    .mission-block { background:var(--ink-2); border:1px solid var(--line); border-left:3px solid var(--violet); border-radius:var(--r-lg); padding:32px 36px; margin:32px 0; }
+    .mission-block p { font-size:15.5px; color:var(--text-2); line-height:1.8; }
+    .value-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-top:28px; }
+    .value-card { background:var(--ink-2); border:1px solid var(--line); border-radius:var(--r-lg); padding:24px; transition:all var(--t-slow) var(--ease); }
+    .value-card:hover { border-color:rgba(124,109,240,0.3); background:var(--ink-3); }
+    .value-icon { width:36px; height:36px; border-radius:var(--r-sm); background:rgba(124,109,240,0.1); border:1px solid rgba(124,109,240,0.2); display:grid; place-items:center; margin-bottom:14px; }
+    .value-icon svg { width:16px; height:16px; stroke:var(--violet-2); fill:none; stroke-width:1.8; }
+    .value-title { font-family:var(--font-display); font-size:15px; font-weight:700; margin-bottom:8px; }
+    .value-desc { font-size:13px; color:var(--text-2); line-height:1.6; }
+    .stack-tag { padding:6px 14px; border-radius:99px; border:1px solid var(--line); background:var(--ink-2); font-family:var(--font-mono); font-size:12px; color:var(--text-2); display:inline-block; margin:4px; transition:all var(--t) var(--ease); }
+    .stack-tag:hover { border-color:var(--violet); color:var(--violet-2); }
+    .hero-img-strip { width:100%; height:300px; object-fit:cover; border-radius:var(--r-xl); margin:32px 0; filter:brightness(0.45) saturate(0.6); border:1px solid var(--line); }
+  </style>
+</head>
+<body>
+<nav class="landing-nav">
+  <div class="navbar-logo">Agent<span>ive</span></div>
+  <div class="landing-nav-links">
+    <a href="index.html">Home</a>
+    <a href="index.html#features">Features</a>
+    <a href="help.html">Help</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="landing-nav-actions">
+    <a href="login.html" class="btn btn-ghost btn-sm">Sign in</a>
+    <a href="login.html#register" class="btn btn-primary btn-sm">Get started</a>
+  </div>
+</nav>
+
+<div class="info-page">
+
+  <div data-fade>
+    <div class="section-eyebrow">About us</div>
+    <h1>Built by <span class="grad-text">DevNexus</span></h1>
+    <p class="lead">A collaborative tech team focused on building scalable software products, AI-driven systems, and cloud-based solutions — from experimental concepts to production-ready platforms.</p>
+  </div>
+
+  <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&q=75&auto=format&fit=crop"
+    alt="Team collaborating" class="hero-img-strip" data-fade loading="lazy"/>
+
+  <div data-fade>
+    <h2>Our mission</h2>
+    <div class="mission-block">
+      <p>DevNexus is a collaborative tech team focused on building scalable software products, AI-driven systems, and cloud-based solutions. Our work combines modern frontend experiences, intelligent backend architectures, multi-agent AI workflows, and real-world product development.</p>
+      <br/>
+      <p>From experimental concepts to client-based freelancing projects, we aim to create systems that are practical, innovative, and production-oriented — while continuously learning and evolving as developers.</p>
+    </div>
+  </div>
+
+  <div data-fade>
+    <h2>What we stand for</h2>
+    <div class="value-grid">
+      <div class="value-card tilt-card">
+        <div class="value-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="value-title">Production-first</div>
+        <p class="value-desc">We build things that ship. Every system is designed for real-world use, not just demos or portfolios.</p>
+      </div>
+      <div class="value-card tilt-card">
+        <div class="value-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+        <div class="value-title">Continuous learning</div>
+        <p class="value-desc">Technology evolves fast. We stay at the frontier — exploring new tools, architectures, and approaches constantly.</p>
+      </div>
+      <div class="value-card tilt-card">
+        <div class="value-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="value-title">Collaboration</div>
+        <p class="value-desc">Every product we build is a team effort. The best systems emerge from diverse perspectives working together.</p>
+      </div>
+      <div class="value-card tilt-card">
+        <div class="value-icon"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+        <div class="value-title">Quality craft</div>
+        <p class="value-desc">We care about the details — clean architecture, maintainable code, and interfaces that feel deliberate and polished.</p>
+      </div>
+    </div>
+  </div>
+
+  <div data-fade style="margin-top:56px">
+    <h2>The team</h2>
+    <p>DevNexus brings together engineers with complementary strengths across the full product stack.</p>
+    <div class="team-grid stagger-children">
+      <div class="team-card tilt-card">
+        <div class="team-avatar" style="background:rgba(124,109,240,0.12);color:var(--violet-2)">AI</div>
+        <div class="team-name">AI Systems</div>
+        <div class="team-role">Intelligence Layer</div>
+        <p class="team-bio">Designing multi-agent workflows, inference pipelines, and the intelligent core of every product we ship.</p>
+      </div>
+      <div class="team-card tilt-card">
+        <div class="team-avatar" style="background:rgba(74,222,128,0.1);color:#4ade80">FE</div>
+        <div class="team-name">Frontend Guild</div>
+        <div class="team-role">Product &amp; Design</div>
+        <p class="team-bio">Crafting modern, responsive interfaces with attention to animation, accessibility, and user experience.</p>
+      </div>
+      <div class="team-card tilt-card">
+        <div class="team-avatar" style="background:rgba(240,180,41,0.1);color:#f0b429">BE</div>
+        <div class="team-name">Backend Guild</div>
+        <div class="team-role">Infrastructure</div>
+        <p class="team-bio">Building scalable APIs, database architectures, and cloud deployments that hold up under real production load.</p>
+      </div>
+      <div class="team-card tilt-card">
+        <div class="team-avatar" style="background:rgba(240,92,92,0.1);color:#f05c5c">RE</div>
+        <div class="team-name">Research Wing</div>
+        <div class="team-role">Innovation</div>
+        <p class="team-bio">Exploring experimental AI architectures and novel product concepts — and turning them into working prototypes.</p>
+      </div>
+    </div>
+  </div>
+
+  <div data-fade style="margin-top:56px">
+    <h2>Our stack</h2>
+    <p>Agentive is built on a production-grade stack chosen for reliability, speed, and extensibility.</p>
+    <div style="margin-top:18px">
+      <span class="stack-tag">FastAPI</span><span class="stack-tag">PostgreSQL</span>
+      <span class="stack-tag">SQLAlchemy</span><span class="stack-tag">Alembic</span>
+      <span class="stack-tag">Groq</span><span class="stack-tag">LLaMA 3.3 70B</span>
+      <span class="stack-tag">Mixtral 8x7B</span><span class="stack-tag">Gemma 2</span>
+      <span class="stack-tag">Python</span><span class="stack-tag">JWT Auth</span>
+      <span class="stack-tag">Vanilla JS</span><span class="stack-tag">HTML5 / CSS3</span>
+    </div>
+  </div>
+
+  <div style="margin-top:56px;padding-top:32px;border-top:1px solid var(--line);display:flex;gap:14px;flex-wrap:wrap" data-fade>
+    <a href="login.html#register" class="btn btn-primary">Start building with us</a>
+    <a href="contact.html" class="btn btn-outline">Get in touch</a>
+  </div>
+</div>
+
+<div style="border-top:1px solid var(--line);padding:24px 40px;display:flex;justify-content:space-between;max-width:820px;margin:0 auto">
+  <a href="index.html" style="color:var(--text-3);font-family:var(--font-mono);font-size:12px">← Back to home</a>
+  <span style="font-family:var(--font-mono);font-size:12px;color:var(--text-3)">© 2026 DevNexus</span>
+</div>
+
+<script type="module" src="js/animations.js"></script>
+</body>
+</html>

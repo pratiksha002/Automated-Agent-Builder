@@ -1,139 +1,100 @@
 import { api } from './api.js';
+import { toast } from './ui.js';
 
-if (!sessionStorage.getItem('token')) {
-    window.location.href = '/index.html';
-}
+if (!sessionStorage.getItem('token')) window.location.href = '/index.html';
 
-const form = document.getElementById('create-agent-form');
-const errorEl = document.getElementById('form-error');
-const modelSelect = document.getElementById('model-select');
-const toolsGrid = document.getElementById('tools-grid');
-const backBtn = document.getElementById('back-btn');
-const logoutBtn = document.getElementById('logout-btn');
-
-const AVAILABLE_TOOLS = [
-    { name: 'web_search', label: 'Web Search' },
-    { name: 'calculator', label: 'Calculator' },
-    { name: 'code_executor', label: 'Code Executor' },
-];
+document.getElementById('logout-btn')?.addEventListener('click', () => { sessionStorage.clear(); window.location.href = '/index.html'; });
+document.getElementById('back-btn')?.addEventListener('click', () => window.location.href = '/dashboard.html');
 
 const MODELS = [
-    { id: 'llama-3.3-70b-versatile', label: 'LLaMA 3.3 70B' },
-    { id: 'llama-3.1-8b-instant', label: 'LLaMA 3.1 8B' },
-    { id: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B' },
-    { id: 'gemma2-9b-it', label: 'Gemma 2 9B' },
+  { id: 'llama-3.3-70b-versatile', name: 'LLaMA 3.3',  detail: '70B · Best quality' },
+  { id: 'llama-3.1-8b-instant',    name: 'LLaMA 3.1',  detail: '8B · Fastest'        },
+  { id: 'mixtral-8x7b-32768',      name: 'Mixtral',    detail: '8×7B · 32k context'  },
+  { id: 'gemma2-9b-it',            name: 'Gemma 2',    detail: '9B · Efficient'       },
+];
+const TOOLS = [
+  { name: 'web_search',    label: 'Web Search'    },
+  { name: 'calculator',    label: 'Calculator'    },
+  { name: 'code_executor', label: 'Code Executor' },
 ];
 
-logoutBtn?.addEventListener('click', () => {
-    sessionStorage.clear();
-    window.location.href = '/index.html';
+// Populate models
+const modelGrid = document.getElementById('model-grid');
+MODELS.forEach((m, i) => {
+  const div = document.createElement('div');
+  div.className = 'model-opt';
+  div.innerHTML = `
+    <input type="radio" name="model" id="m-${m.id}" value="${m.id}" ${i === 0 ? 'checked' : ''}>
+    <label class="model-lbl" for="m-${m.id}">
+      <span class="model-name">${m.name}</span>
+      <span class="model-detail">${m.detail}</span>
+    </label>`;
+  modelGrid?.appendChild(div);
 });
 
-backBtn?.addEventListener('click', () => {
-    window.location.href = '/dashboard.html';
+// Populate tools
+const toolsGrid = document.getElementById('tools-grid');
+TOOLS.forEach(t => {
+  const lbl = document.createElement('label');
+  lbl.className = 'tool-lbl';
+  lbl.innerHTML = `<input type="checkbox" value="${t.name}"> ${t.label}`;
+  const cb = lbl.querySelector('input');
+  cb.addEventListener('change', () => lbl.classList.toggle('checked', cb.checked));
+  toolsGrid?.appendChild(lbl);
 });
 
-// ─── Populate model dropdown ──────────────────────────────────────────────────
-function populateModels() {
-    if (!modelSelect) return;
-    MODELS.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m.id;
-        opt.textContent = m.label;
-        modelSelect.appendChild(opt);
-    });
-}
+// Prompt counter
+const promptEl = document.getElementById('agent-prompt');
+const countEl  = document.getElementById('prompt-count');
+promptEl?.addEventListener('input', () => { if (countEl) countEl.textContent = promptEl.value.length + ' chars'; });
 
-// ─── Populate tools grid ──────────────────────────────────────────────────────
-function populateTools() {
-    if (!toolsGrid) return;
-    AVAILABLE_TOOLS.forEach(tool => {
-        const label = document.createElement('label');
-        label.className = 'tool-checkbox';
-        label.innerHTML = `
-      <input type="checkbox" value="${tool.name}" />
-      ${tool.label}
-    `;
-        const checkbox = label.querySelector('input');
-        checkbox.addEventListener('change', () => {
-            label.classList.toggle('checked', checkbox.checked);
-        });
-        toolsGrid.appendChild(label);
-    });
-}
-
-// ─── Get selected tools ───────────────────────────────────────────────────────
-function getSelectedTools() {
-    const checkboxes = toolsGrid?.querySelectorAll('input[type=checkbox]:checked') || [];
-    return Array.from(checkboxes).map(cb => ({
-        tool_name: cb.value,
-        tool_config: {},
-    }));
-}
-
-// ─── Get selected model UUID from backend ────────────────────────────────────
-// We need the UUID from the DB, not the groq_model_id string.
-// We fetch the agent list which includes model_id UUIDs from platform agents
-// and use that to build a groq_id -> UUID map.
-async function getModelUUID(groqModelId) {
+// We need a real model UUID to send to the backend.
+// Fetch the platform agents to build a groq_model_id → UUID map.
+let modelUuidMap = {};
+async function buildModelMap() {
+  try {
     const agents = await api.agents.list();
-    const match = agents.find(a => a.is_platform_agent);
-    if (!match) throw new Error('Could not resolve model UUID.');
-
-    // Fetch the full agent to get model details
-    const full = await api.agents.get(match.id);
-    // We need a dedicated models endpoint ideally, but for now
-    // we return the model_id from a platform agent using the same model
-    const platformByModel = agents.filter(a => a.is_platform_agent);
-    for (const a of platformByModel) {
-        const detail = await api.agents.get(a.id);
-        // We check the groq_model_id via name matching — crude but works for v1
-        if (detail.name.toLowerCase().includes('general') && groqModelId.includes('70b')) {
-            return detail.model_id;
-        }
+    const platform = agents.filter(a => a.is_platform_agent);
+    for (const a of platform) {
+      const det = await api.agents.get(a.id);
+      // We don't have groq_model_id from AgentRead, but we can infer it
+      // from the agent name which the seed sets deterministically.
+      const n = (det.name || '').toLowerCase();
+      let groqId = null;
+      if (n.includes('llama') && n.includes('70')) groqId = 'llama-3.3-70b-versatile';
+      else if (n.includes('llama') && n.includes('8'))  groqId = 'llama-3.1-8b-instant';
+      else if (n.includes('mixtral'))                   groqId = 'mixtral-8x7b-32768';
+      else if (n.includes('gemma'))                     groqId = 'gemma2-9b-it';
+      if (groqId) modelUuidMap[groqId] = det.model_id;
     }
-    return full.model_id;
+  } catch (_) {}
 }
+buildModelMap();
 
-// ─── Submit ───────────────────────────────────────────────────────────────────
-form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    errorEl.textContent = '';
+document.getElementById('create-form')?.addEventListener('submit', async e => {
+  e.preventDefault();
+  const errEl = document.getElementById('form-error');
+  const btn   = e.target.querySelector('button[type=submit]');
+  errEl.textContent = '';
 
-    const name = document.getElementById('agent-name').value.trim();
-    const description = document.getElementById('agent-description').value.trim();
-    const system_prompt = document.getElementById('agent-system-prompt').value.trim();
-    const groqModelId = modelSelect?.value;
-    const tools = getSelectedTools();
-    const btn = form.querySelector('button[type=submit]');
+  const name        = document.getElementById('agent-name').value.trim();
+  const description = document.getElementById('agent-desc').value.trim();
+  const system_prompt = promptEl?.value.trim();
+  const groqId      = document.querySelector('input[name="model"]:checked')?.value || MODELS[0].id;
+  const tools       = Array.from(toolsGrid?.querySelectorAll('input:checked') || []).map(cb => ({ tool_name: cb.value, tool_config: {} }));
 
-    if (!name || !system_prompt) {
-        errorEl.textContent = 'Name and system prompt are required.';
-        return;
-    }
+  if (!name || !system_prompt) { errEl.textContent = 'Name and system prompt are required.'; return; }
 
-    btn.disabled = true;
-    btn.textContent = 'Creating...';
+  const model_id = modelUuidMap[groqId];
+  if (!model_id) { errEl.textContent = 'Model not resolved yet — try again in a moment.'; return; }
 
-    try {
-        // Resolve model UUID from backend
-        const model_id = await getModelUUID(groqModelId);
-
-        await api.agents.create({
-            name,
-            description,
-            system_prompt,
-            model_id,
-            tools,
-        });
-
-        window.location.href = '/dashboard.html';
-    } catch (err) {
-        errorEl.textContent = err.message;
-        btn.disabled = false;
-        btn.textContent = 'Create Agent';
-    }
+  btn.disabled = true; btn.textContent = 'Creating…';
+  try {
+    await api.agents.create({ name, description, system_prompt, model_id, tools });
+    toast(`"${name}" created!`, 'success');
+    setTimeout(() => window.location.href = '/dashboard.html', 700);
+  } catch (err) {
+    errEl.textContent = err.message;
+    btn.disabled = false; btn.textContent = 'Create Agent';
+  }
 });
-
-populateModels();
-populateTools();

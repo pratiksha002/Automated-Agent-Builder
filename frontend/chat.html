@@ -1,75 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chat — Agent Builder</title>
-  <link rel="stylesheet" href="css/global.css" />
-  <link rel="stylesheet" href="css/dashboard.css" />
-  <link rel="stylesheet" href="css/chat.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat — Agentive</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <link rel="stylesheet" href="css/chat.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
 </head>
 <body>
-  <div class="chat-layout">
+<div class="chat-layout">
 
-    <!-- ── Navbar ── -->
-    <nav class="navbar">
-      <div class="navbar-logo">Agent<span>Builder</span></div>
-      <div class="navbar-right">
-        <button class="btn btn-ghost" onclick="window.location.href='/dashboard.html'">
-          ← Dashboard
-        </button>
-        <button class="btn btn-ghost" id="logout-btn">Log out</button>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-logo">Agent<span>ive</span></div>
+    <div class="navbar-right">
+      <button class="btn btn-ghost btn-sm" onclick="window.location.href='dashboard.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          style="width:13px;height:13px"><line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/></svg>
+        Dashboard
+      </button>
+      <button class="btn btn-ghost btn-sm" id="logout-btn">Sign out</button>
+    </div>
+  </nav>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-head">
+      <span class="sidebar-head-title">Conversations</span>
+      <button class="btn btn-ghost btn-sm" id="new-chat-btn">+ New</button>
+    </div>
+    <div class="sidebar-search">
+      <input type="text" id="sidebar-search" placeholder="Search conversations…"/>
+    </div>
+    <div class="sidebar-list" id="sidebar-list">
+      <p class="sidebar-empty">Loading…</p>
+    </div>
+  </aside>
+
+  <!-- Chat area -->
+  <div class="chat-area">
+
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <div class="chat-agent-name" id="chat-agent-name">Agent</div>
+        <div class="chat-agent-sub" id="chat-agent-sub"></div>
       </div>
-    </nav>
-
-    <!-- ── Sidebar ── -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <span class="sidebar-title">Conversations</span>
-        <button class="btn btn-ghost" id="new-chat-btn" style="padding:4px 10px;font-size:13px;">
-          + New
-        </button>
+      <div class="chat-status">
+        <div class="chat-status-dot"></div>
+        online
       </div>
-      <div class="sidebar-list" id="sidebar-list">
-        <p class="sidebar-empty">Loading...</p>
-      </div>
-    </aside>
+    </div>
 
-    <!-- ── Chat Area ── -->
-    <div class="chat-area">
+    <!-- Welcome / greeting state -->
+    <div id="chat-welcome" class="chat-welcome">
+      <!-- Greeting injected by JS -->
+      <div id="chat-greeting" style="text-align:center;margin-bottom:24px"></div>
+      <div class="starters" id="starters"></div>
+    </div>
 
-      <!-- Header -->
-      <div class="chat-header">
-        <div>
-          <div class="chat-agent-name" id="chat-agent-name">Select an agent</div>
-          <div class="chat-agent-model" id="chat-agent-model"></div>
-        </div>
-      </div>
-
-      <!-- Empty state -->
-      <div id="chat-empty" class="chat-empty">
-        <div>
-          <div class="chat-empty-title">Start a conversation</div>
-          <p>Click "+ New" to begin chatting with this agent.</p>
-        </div>
-      </div>
-
-      <!-- Messages + Input (hidden until conversation is active) -->
-      <div id="chat-area-content" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
-        <div class="messages" id="messages"></div>
-        <div class="chat-input-bar">
+    <!-- Messages + input (hidden until first message) -->
+    <div id="chat-content" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+      <div class="messages" id="messages"></div>
+      <div class="input-bar">
+        <div class="input-wrap">
           <textarea
             id="chat-input"
-            placeholder="Type a message… (Enter to send, Shift+Enter for newline)"
             rows="1"
+            placeholder="Type a message… (Enter to send · Shift+Enter for newline)"
           ></textarea>
-          <button class="send-btn" id="send-btn" title="Send">↑</button>
+          <button class="send-btn" id="send-btn" title="Send message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="19" x2="12" y2="5"/>
+              <polyline points="5 12 12 5 19 12"/>
+            </svg>
+          </button>
+        </div>
+        <div class="input-meta">
+          <span class="input-hint">Enter to send · Shift+Enter for newline</span>
+          <span class="char-count" id="char-count">0</span>
         </div>
       </div>
-
     </div>
-  </div>
 
-  <script type="module" src="js/chat.js"></script>
+  </div><!-- /chat-area -->
+</div><!-- /chat-layout -->
+
+<script type="module" src="js/chat.js"></script>
+<script type="module" src="js/animations.js"></script>
 </body>
 </html>

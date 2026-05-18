@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In — Agentive</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <link rel="stylesheet" href="css/auth.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
+</head>
+<body>
+<div class="auth-root">
+
+  <!-- Art panel -->
+  <div class="auth-art">
+    <div class="auth-art-grid"></div>
+    <div class="auth-art-content">
+      <a href="index.html" class="navbar-logo" style="display:block;margin-bottom:56px">
+        Agent<span>ive</span>
+      </a>
+      <div class="auth-art-quote">
+        Build intelligent agents that work for you — <em>around the clock.</em>
+      </div>
+      <p class="auth-art-sub">
+        Configure once. Deploy instantly. Your agents remember everything.
+      </p>
+      <div style="margin-top:48px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:12px;font-size:13px;color:var(--text-3)">
+          <div style="width:20px;height:20px;border-radius:50%;background:rgba(124,109,240,0.2);border:1px solid rgba(124,109,240,0.4);display:grid;place-items:center;flex-shrink:0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--violet-2)" stroke-width="2.5" style="width:10px;height:10px"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          Sub-second response times via Groq
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:13px;color:var(--text-3)">
+          <div style="width:20px;height:20px;border-radius:50%;background:rgba(124,109,240,0.2);border:1px solid rgba(124,109,240,0.4);display:grid;place-items:center;flex-shrink:0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--violet-2)" stroke-width="2.5" style="width:10px;height:10px"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          Persistent conversation memory
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:13px;color:var(--text-3)">
+          <div style="width:20px;height:20px;border-radius:50%;background:rgba(124,109,240,0.2);border:1px solid rgba(124,109,240,0.4);display:grid;place-items:center;flex-shrink:0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--violet-2)" stroke-width="2.5" style="width:10px;height:10px"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          Private by default — your data stays yours
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form panel -->
+  <div class="auth-form-side">
+    <a href="index.html" class="auth-logo">Agent<span>ive</span></a>
+
+    <!-- Login panel -->
+    <div id="login-panel">
+      <div class="auth-heading">
+        <h1>Welcome back</h1>
+        <p>Sign in to access your agents and conversations.</p>
+      </div>
+      <form class="auth-form" id="login-form" onsubmit="return false">
+        <div class="form-group">
+          <label for="login-email">Email address</label>
+          <input id="login-email" type="email" placeholder="you@example.com"
+            autocomplete="email" required/>
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input id="login-password" type="password" placeholder="••••••••"
+            autocomplete="current-password" required/>
+        </div>
+        <p class="error-msg" id="login-error"></p>
+        <button type="submit" class="btn btn-primary" style="width:100%;padding:13px;margin-top:4px">
+          Sign in
+        </button>
+      </form>
+      <p class="auth-switch">Don't have an account? <a id="show-register">Create one free</a></p>
+    </div>
+
+    <!-- Register panel -->
+    <div id="register-panel" class="panel-hidden">
+      <div class="auth-heading">
+        <h1>Create account</h1>
+        <p>Start building AI agents in under two minutes.</p>
+      </div>
+      <form class="auth-form" id="register-form" onsubmit="return false">
+        <div class="form-group">
+          <label for="reg-name">Full name</label>
+          <input id="reg-name" type="text" placeholder="Your name" required/>
+        </div>
+        <div class="form-group">
+          <label for="reg-email">Email address</label>
+          <input id="reg-email" type="email" placeholder="you@example.com" required/>
+        </div>
+        <div class="form-group">
+          <label for="reg-password">Password</label>
+          <input id="reg-password" type="password"
+            placeholder="Choose a strong password" required/>
+        </div>
+        <p class="error-msg" id="register-error"></p>
+        <button type="submit" class="btn btn-primary" style="width:100%;padding:13px;margin-top:4px">
+          Create account
+        </button>
+      </form>
+      <p class="auth-switch">Already have an account? <a id="show-login">Sign in</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  if (window.location.hash === '#register') {
+    document.getElementById('login-panel').classList.add('panel-hidden');
+    document.getElementById('register-panel').classList.remove('panel-hidden');
+  }
+</script>
+<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/animations.js"></script>
+</body>
+</html>

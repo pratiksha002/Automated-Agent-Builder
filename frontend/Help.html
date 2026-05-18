@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Help &amp; Documentation — Agentive</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <link rel="stylesheet" href="css/landing.css"/>
+  <link rel="stylesheet" href="css/pages.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
+  <style>
+    .doc-nav { display:flex; flex-direction:column; gap:4px; margin-bottom:40px; }
+    .doc-nav-link { font-size:13.5px; color:var(--text-2); padding:8px 14px; border-radius:var(--r); border:1px solid transparent; cursor:pointer; transition:all var(--t) var(--ease); font-family:var(--font-body); }
+    .doc-nav-link:hover { color:var(--text); background:var(--ink-2); border-color:var(--line); }
+    .doc-section { margin-bottom:64px; scroll-margin-top:80px; }
+    .doc-section h2 { font-family:var(--font-display); font-size:24px; font-weight:800; letter-spacing:-0.02em; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--line); }
+    .step-list { display:flex; flex-direction:column; gap:16px; margin-top:20px; }
+    .step-item { display:flex; gap:16px; align-items:flex-start; }
+    .step-num { width:28px; height:28px; border-radius:50%; background:rgba(124,109,240,0.12); border:1px solid rgba(124,109,240,0.25); display:grid; place-items:center; font-family:var(--font-mono); font-size:12px; font-weight:700; color:var(--violet-2); flex-shrink:0; margin-top:2px; }
+    .step-body { flex:1; }
+    .step-title { font-weight:600; font-size:15px; margin-bottom:4px; }
+    .step-desc { font-size:14px; color:var(--text-2); line-height:1.65; }
+    .tip-block { background:rgba(124,109,240,0.06); border:1px solid rgba(124,109,240,0.2); border-radius:var(--r); padding:16px 20px; margin-top:16px; font-size:13.5px; color:var(--text-2); line-height:1.6; }
+    .tip-block strong { color:var(--violet-2); }
+    .code-snippet { background:var(--ink-3); border:1px solid var(--line); border-radius:var(--r); padding:14px 18px; font-family:var(--font-mono); font-size:12.5px; color:var(--text-2); margin-top:12px; line-height:1.7; overflow-x:auto; }
+    .model-table { width:100%; border-collapse:collapse; margin-top:16px; font-size:13.5px; }
+    .model-table th { background:var(--ink-3); color:var(--text-2); padding:10px 16px; text-align:left; font-family:var(--font-mono); font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; border:1px solid var(--line); }
+    .model-table td { padding:12px 16px; border:1px solid var(--line); color:var(--text-2); line-height:1.5; }
+    .model-table tr:hover td { background:var(--ink-2); }
+  </style>
+</head>
+<body>
+<nav class="landing-nav">
+  <div class="navbar-logo">Agent<span>ive</span></div>
+  <div class="landing-nav-links">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="landing-nav-actions">
+    <a href="login.html" class="btn btn-ghost btn-sm">Sign in</a>
+    <a href="login.html#register" class="btn btn-primary btn-sm">Get started</a>
+  </div>
+</nav>
+
+<div class="info-page" style="max-width:900px">
+  <div data-fade>
+    <div class="section-eyebrow">Documentation</div>
+    <h1>Help &amp; Guide</h1>
+    <p class="lead">Everything you need to get the most out of Agentive — from first login to advanced agent configuration.</p>
+  </div>
+
+  <!-- Quick nav -->
+  <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:var(--r-lg);padding:24px 28px;margin-bottom:48px" data-fade>
+    <p style="font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:16px">On this page</p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <a href="#getting-started" class="doc-nav-link">Getting started</a>
+      <a href="#agents" class="doc-nav-link">Creating agents</a>
+      <a href="#models" class="doc-nav-link">Choosing a model</a>
+      <a href="#chatting" class="doc-nav-link">Chatting with agents</a>
+      <a href="#conversations" class="doc-nav-link">Managing conversations</a>
+      <a href="#prompts" class="doc-nav-link">Writing system prompts</a>
+      <a href="#faq" class="doc-nav-link">FAQ</a>
+    </div>
+  </div>
+
+  <!-- Getting started -->
+  <div class="doc-section" id="getting-started" data-fade>
+    <h2>Getting started</h2>
+    <p>Agentive is ready to use from the moment you create your account. Follow these steps to send your first message.</p>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Create your account</div>
+          <p class="step-desc">Go to the sign-up page and enter your name, email, and a password. Your workspace is provisioned immediately — no email verification delay.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Open the dashboard</div>
+          <p class="step-desc">After signing in, you land on the Dashboard. You'll see Platform Agents — pre-configured agents maintained by Agentive — ready to use immediately.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Click "Chat" on any agent</div>
+          <p class="step-desc">This opens the Chat page with that agent selected. A new conversation is created automatically when you send your first message.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">Type and send</div>
+          <p class="step-desc">Type in the input bar and press <strong>Enter</strong> to send. Use <strong>Shift + Enter</strong> for a newline. The agent's response streams in word by word.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Creating agents -->
+  <div class="doc-section" id="agents" data-fade>
+    <h2>Creating custom agents</h2>
+    <p>Custom agents let you build a specialised AI with a specific role, tone, and expertise — yours alone, not shared with other users.</p>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Click "+ New Agent" on the dashboard</div>
+          <p class="step-desc">This opens the agent creation form.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Fill in the name and description</div>
+          <p class="step-desc">The name appears on your dashboard card. The description is shown as a subtitle — keep it concise and descriptive.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Write the system prompt</div>
+          <p class="step-desc">This is the most important field. It defines who your agent is. See the <a href="#prompts" style="color:var(--violet-2)">system prompt guide</a> below for best practices.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">Select a model and save</div>
+          <p class="step-desc">Choose the model that fits your use case (see the model guide below), then click <strong>Create Agent</strong>. Your agent appears on the dashboard immediately.</p>
+        </div>
+      </div>
+    </div>
+    <div class="tip-block"><strong>Tip:</strong> You can delete custom agents from the dashboard card using the delete button. Platform agents cannot be deleted — they are maintained by Agentive.</div>
+  </div>
+
+  <!-- Models -->
+  <div class="doc-section" id="models" data-fade>
+    <h2>Choosing a model</h2>
+    <p>Each model has different strengths. Choose based on the task your agent will handle.</p>
+    <table class="model-table">
+      <thead>
+        <tr><th>Model</th><th>Best for</th><th>Speed</th><th>Context</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>LLaMA 3.3 · 70B</strong></td><td>Complex reasoning, analysis, long-form writing</td><td>Fast</td><td>32k tokens</td></tr>
+        <tr><td><strong>LLaMA 3.1 · 8B</strong></td><td>Quick Q&A, summaries, simple tasks</td><td>Very fast</td><td>32k tokens</td></tr>
+        <tr><td><strong>Mixtral · 8×7B</strong></td><td>Balanced — good at coding and instruction-following</td><td>Fast</td><td>32k tokens</td></tr>
+        <tr><td><strong>Gemma 2 · 9B</strong></td><td>Efficient general-purpose tasks</td><td>Very fast</td><td>8k tokens</td></tr>
+      </tbody>
+    </table>
+    <div class="tip-block"><strong>Recommendation:</strong> Start with <strong>LLaMA 3.3 70B</strong> for most agents. Switch to <strong>LLaMA 3.1 8B</strong> if you need faster responses for simpler tasks. Avoid Gemma 2 for very long conversations — its 8k context fills up quickly.</div>
+  </div>
+
+  <!-- Chatting -->
+  <div class="doc-section" id="chatting" data-fade>
+    <h2>Chatting with agents</h2>
+    <p>The chat interface is designed for extended, context-rich conversations.</p>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">→</div>
+        <div class="step-body">
+          <div class="step-title">Enter sends, Shift+Enter adds a newline</div>
+          <p class="step-desc">For multi-paragraph messages, use Shift+Enter to format before sending.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">→</div>
+        <div class="step-body">
+          <div class="step-title">Copy any message</div>
+          <p class="step-desc">Hover over any message to reveal the <strong>Copy</strong> button. Code blocks also have individual copy buttons in their header bar.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">→</div>
+        <div class="step-body">
+          <div class="step-title">Responses render as formatted text</div>
+          <p class="step-desc">Bold, lists, headings, tables, and code blocks all render properly. You don't need to ask the agent to avoid markdown — it renders it.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conversations -->
+  <div class="doc-section" id="conversations" data-fade>
+    <h2>Managing conversations</h2>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">→</div>
+        <div class="step-body">
+          <div class="step-title">Start a new conversation</div>
+          <p class="step-desc">Click <strong>+ New</strong> in the sidebar. Each conversation maintains its own context — perfect for separating different projects or topics.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">→</div>
+        <div class="step-body">
+          <div class="step-title">Search conversations</div>
+          <p class="step-desc">Use the search box in the sidebar to filter conversations by title. Titles are auto-generated from your first message.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">→</div>
+        <div class="step-body">
+          <div class="step-title">Delete a conversation</div>
+          <p class="step-desc">Hover over any sidebar item and click the ✕ button. A confirmation dialog appears before deletion — this action is permanent.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- System prompts -->
+  <div class="doc-section" id="prompts" data-fade>
+    <h2>Writing effective system prompts</h2>
+    <p>The system prompt is the single most important configuration for your agent. Here is how to write one that works.</p>
+    <div class="step-list">
+      <div class="step-item">
+        <div class="step-num">→</div>
+        <div class="step-body">
+          <div class="step-title">Define the role clearly</div>
+          <p class="step-desc">Start with "You are a [role] that specialises in [domain]." Be specific — vague prompts produce vague agents.</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">→</div>
+        <div class="step-body">
+          <div class="step-title">Set the tone</div>
+          <p class="step-desc">Tell the agent how to communicate: "Respond in a concise, professional tone" or "Use casual, friendly language and avoid jargon."</p>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">→</div>
+        <div class="step-body">
+          <div class="step-title">Define boundaries</div>
+          <p class="step-desc">Specify what the agent should and should not do: "Only answer questions related to Python. For other topics, politely redirect the user."</p>
+        </div>
+      </div>
+    </div>
+    <div class="code-snippet">You are a senior Python engineer with 10+ years of experience.
+You specialise in writing clean, well-documented, production-grade code.
+Always explain your reasoning before showing code.
+Format all code in proper Python with type hints.
+If the user's question is unclear, ask for clarification before answering.</div>
+    <div class="tip-block"><strong>Tip:</strong> Longer prompts are not always better. A focused 100-word prompt outperforms a vague 500-word one. Test iteratively — send a few messages and refine the prompt based on the agent's actual responses.</div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="doc-section" id="faq" data-fade>
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      <div class="faq-item">
+        <div class="faq-q">Why does the agent sometimes forget earlier messages?<em class="faq-icon">+</em></div>
+        <div class="faq-a">Every model has a context window — a maximum number of tokens it can process at once. On very long conversations, older messages are automatically trimmed from the context to keep the most recent exchange within the limit. Gemma 2 has the smallest window (8k), so this happens sooner with that model.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I have multiple conversations with the same agent?<em class="faq-icon">+</em></div>
+        <div class="faq-a">Yes. Click "+ New" in the sidebar to open a fresh conversation with the currently selected agent. Each conversation is independent with its own context. You can switch between them freely from the sidebar.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can other users see my conversations or custom agents?<em class="faq-icon">+</em></div>
+        <div class="faq-a">No. Conversations and custom agents are private to your account. Only platform agents are visible to all users. Every API request enforces ownership — you cannot access another user's resources, even if you know the ID.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What happens if the API returns an error mid-conversation?<em class="faq-icon">+</em></div>
+        <div class="faq-a">A toast notification appears describing the error. Your conversation history is preserved — the failed turn is not saved. You can retry by sending the same message again.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I delete my account?<em class="faq-icon">+</em></div>
+        <div class="faq-a">Account deletion is not yet self-serve. Please email us at devnexus26@gmail.com with your registered email address and we will process the deletion within 48 hours.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Is there a limit on how many messages I can send?<em class="faq-icon">+</em></div>
+        <div class="faq-a">The platform applies a rate limit of 20 messages per minute per IP to prevent abuse. For normal usage this limit will never be reached. If you do hit it, simply wait a minute and continue.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:24px 0;border-top:1px solid var(--line);display:flex;gap:14px;align-items:center;flex-wrap:wrap" data-fade>
+    <span style="font-size:14px;color:var(--text-2)">Still have questions?</span>
+    <a href="contact.html" class="btn btn-outline btn-sm">Contact DevNexus</a>
+    <a href="login.html#register" class="btn btn-primary btn-sm">Start building free</a>
+  </div>
+</div>
+
+<div style="border-top:1px solid var(--line);padding:24px 40px;display:flex;justify-content:space-between;max-width:900px;margin:0 auto">
+  <a href="index.html" style="color:var(--text-3);font-family:var(--font-mono);font-size:12px">← Back to home</a>
+  <span style="font-family:var(--font-mono);font-size:12px;color:var(--text-3)">© 2026 DevNexus</span>
+</div>
+
+<script type="module" src="js/animations.js"></script>
+<script>
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      const item = q.parentElement;
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    });
+  });
+</script>
+</body>
+</html>

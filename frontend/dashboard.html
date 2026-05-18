@@ -1,55 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard — Agent Builder</title>
-  <link rel="stylesheet" href="css/global.css" />
-  <link rel="stylesheet" href="css/dashboard.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — Agentive</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <link rel="stylesheet" href="css/dashboard.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
 </head>
 <body>
-  <div class="layout">
+<div class="app-layout">
+  <nav class="navbar">
+    <div class="navbar-logo">Agent<span>ive</span></div>
+    <div class="navbar-right">
+      <span class="navbar-user" id="user-name"></span>
+      <button class="btn btn-outline btn-sm"
+        onclick="window.location.href='create-agent.html'">
+        + New Agent
+      </button>
+      <button class="btn btn-ghost btn-sm" id="logout-btn">Sign out</button>
+    </div>
+  </nav>
 
-    <!-- ── Navbar ── -->
-    <nav class="navbar">
-      <div class="navbar-logo">Agent<span>Builder</span></div>
-      <div class="navbar-right">
-        <span class="navbar-user" id="user-name"></span>
-        <button class="btn btn-ghost" onclick="window.location.href='/create-agent.html'">
-          + New Agent
-        </button>
-        <button class="btn btn-ghost" id="logout-btn">Log out</button>
+  <main class="main">
+    <div class="page-header" data-fade>
+      <div class="page-header-left">
+        <div class="page-eyebrow">Dashboard</div>
+        <h1 class="page-title">Your Agents</h1>
+        <p class="page-sub">Chat with platform agents or manage your own custom ones.</p>
       </div>
-    </nav>
+    </div>
 
-    <!-- ── Main ── -->
-    <main class="main">
-      <div class="page-header">
-        <div>
-          <h1 class="page-title">Your Agents</h1>
-          <p class="page-subtitle">Chat with platform agents or manage your own.</p>
-        </div>
-      </div>
+    <div class="section" data-fade data-delay="1">
+      <div class="section-label">Platform Agents</div>
+      <div class="agent-grid" id="platform-agents"></div>
+    </div>
 
-      <!-- Platform Agents -->
-      <div class="section">
-        <div class="section-label">Platform Agents</div>
-        <div class="agent-grid" id="platform-agents">
-          <p class="empty-state">Loading...</p>
-        </div>
-      </div>
-
-      <!-- User Agents -->
-      <div class="section">
-        <div class="section-label">My Agents</div>
-        <div class="agent-grid" id="user-agents">
-          <p class="empty-state">Loading...</p>
-        </div>
-      </div>
-    </main>
-
-  </div>
-
-  <script type="module" src="js/dashboard.js"></script>
+    <div class="section" data-fade data-delay="2">
+      <div class="section-label">My Agents</div>
+      <div class="agent-grid" id="user-agents"></div>
+    </div>
+  </main>
+</div>
+<script type="module" src="js/dashboard.js"></script>
+<script type="module" src="js/animations.js"></script>
 </body>
 </html>

@@ -1,103 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Create Agent — Agent Builder</title>
-  <link rel="stylesheet" href="css/global.css" />
-  <link rel="stylesheet" href="css/dashboard.css" />
-  <link rel="stylesheet" href="css/create-agent.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>New Agent — Agentive</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <link rel="stylesheet" href="css/dashboard.css"/>
+  <link rel="stylesheet" href="css/pages.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
 </head>
 <body>
-  <div class="layout create-page">
+<div class="app-layout create-layout">
+  <nav class="navbar">
+    <div class="navbar-logo">Agent<span>ive</span></div>
+    <div class="navbar-right">
+      <button class="btn btn-ghost btn-sm" id="logout-btn">Sign out</button>
+    </div>
+  </nav>
 
-    <!-- ── Navbar ── -->
-    <nav class="navbar">
-      <div class="navbar-logo">Agent<span>Builder</span></div>
-      <div class="navbar-right">
-        <button class="btn btn-ghost" id="logout-btn">Log out</button>
+  <main class="main">
+    <button class="back-btn" id="back-btn">
+      <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/></svg>
+      Back to dashboard
+    </button>
+
+    <div class="page-header" data-fade>
+      <div class="page-header-left">
+        <div class="page-eyebrow">Create</div>
+        <h1 class="page-title">New Agent</h1>
+        <p class="page-sub">Configure your agent's identity, model, and behaviour.</p>
       </div>
-    </nav>
+    </div>
 
-    <!-- ── Main ── -->
-    <main class="main">
+    <form class="form-card" id="create-form" onsubmit="return false" data-fade data-delay="1">
 
-      <div class="back-link" id="back-btn">← Back to dashboard</div>
-
-      <div class="page-header">
-        <div>
-          <h1 class="page-title">New Agent</h1>
-          <p class="page-subtitle">Configure your agent's identity and behaviour.</p>
-        </div>
+      <div class="form-group">
+        <label for="agent-name">Agent name</label>
+        <input id="agent-name" type="text"
+          placeholder="e.g. Support Bot, Code Reviewer, Research Assistant" required/>
       </div>
 
-      <form class="form-card" id="create-agent-form" onsubmit="return false;">
+      <div class="form-group">
+        <label for="agent-desc">
+          Description
+          <span style="color:var(--text-3);text-transform:none;letter-spacing:0;font-weight:400"> — optional</span>
+        </label>
+        <input id="agent-desc" type="text"
+          placeholder="A short summary shown on your dashboard card"/>
+      </div>
 
-        <!-- Name -->
-        <div class="form-group">
-          <label for="agent-name">Agent Name</label>
-          <input
-            id="agent-name"
-            type="text"
-            placeholder="e.g. Support Bot, Research Assistant"
-            required
-          />
-        </div>
+      <div class="form-group">
+        <label for="agent-prompt">System prompt</label>
+        <textarea id="agent-prompt"
+          placeholder="You are a helpful assistant that specialises in…" required></textarea>
+        <div class="prompt-count" id="prompt-count">0 chars</div>
+        <small>Defines your agent's role, tone, and behaviour. This is sent on every conversation turn.</small>
+      </div>
 
-        <!-- Description -->
-        <div class="form-group">
-          <label for="agent-description">Description <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
-          <input
-            id="agent-description"
-            type="text"
-            placeholder="A short summary shown on the dashboard card"
-          />
-        </div>
+      <div class="form-group">
+        <label>Model</label>
+        <div class="model-grid" id="model-grid"></div>
+        <small>Select the model that best fits your agent's purpose. LLaMA 3.3 70B is recommended for most use cases.</small>
+      </div>
 
-        <!-- System Prompt -->
-        <div class="form-group">
-          <label for="agent-system-prompt">System Prompt</label>
-          <textarea
-            id="agent-system-prompt"
-            placeholder="You are a helpful assistant that specialises in..."
-            required
-          ></textarea>
-          <small>This is injected as the first message to the model on every conversation.</small>
-        </div>
+      <div class="form-group">
+        <label>Tools
+          <span style="color:var(--text-3);text-transform:none;letter-spacing:0;font-weight:400"> — optional</span>
+        </label>
+        <div class="tools-grid" id="tools-grid"></div>
+        <small>Enable additional capabilities for this agent.</small>
+      </div>
 
-        <!-- Model -->
-        <div class="form-group">
-          <label for="model-select">Model</label>
-          <select id="model-select">
-            <!-- Populated by JS -->
-          </select>
-        </div>
+      <p class="error-msg" id="form-error"></p>
 
-        <!-- Tools -->
-        <div class="form-group">
-          <label>Tools <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
-          <div class="tools-grid" id="tools-grid">
-            <!-- Populated by JS -->
-          </div>
-          <small>Enable capabilities for this agent.</small>
-        </div>
-
-        <!-- Error -->
-        <p class="error-msg" id="form-error"></p>
-
-        <!-- Actions -->
-        <div class="form-actions">
-          <button type="button" class="btn btn-ghost" id="back-btn-bottom"
-            onclick="window.location.href='/dashboard.html'">
-            Cancel
-          </button>
-          <button type="submit" class="btn btn-primary">Create Agent</button>
-        </div>
-
-      </form>
-    </main>
-  </div>
-
-  <script type="module" src="js/create-agent.js"></script>
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost"
+          onclick="window.location.href='dashboard.html'">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Agent</button>
+      </div>
+    </form>
+  </main>
+</div>
+<script type="module" src="js/create-agent.js"></script>
+<script type="module" src="js/animations.js"></script>
 </body>
 </html>

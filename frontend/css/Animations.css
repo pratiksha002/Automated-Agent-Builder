@@ -1,0 +1,197 @@
+/* ═══════════════════════════════════════════════════════════════════
+   animations.css — global interactive animation layer
+   Applied across all pages via <link> in every HTML file
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── Page entrance ────────────────────────────────────────────────── */
+body { animation: pageIn 0.4s var(--ease) both; }
+@keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── Scroll-reveal base ───────────────────────────────────────────── */
+[data-fade] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+}
+[data-fade].in { opacity: 1; transform: none; }
+[data-fade][data-delay="1"] { transition-delay: 0.1s; }
+[data-fade][data-delay="2"] { transition-delay: 0.2s; }
+[data-fade][data-delay="3"] { transition-delay: 0.3s; }
+[data-fade][data-delay="4"] { transition-delay: 0.4s; }
+[data-fade][data-delay="5"] { transition-delay: 0.5s; }
+[data-fade][data-delay="6"] { transition-delay: 0.6s; }
+
+/* ── Hover lift ───────────────────────────────────────────────────── */
+.hover-lift {
+  transition: transform var(--t-slow) var(--ease), box-shadow var(--t-slow) var(--ease);
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 56px rgba(0,0,0,0.5);
+}
+
+/* ── Magnetic button shimmer ──────────────────────────────────────── */
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  skewX: -20deg;
+  transition: left 0.5s var(--ease);
+}
+.btn-primary:hover::after { left: 150%; }
+
+/* ── Floating orbs (landing hero bg) ─────────────────────────────── */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  animation: orbFloat linear infinite;
+  will-change: transform;
+}
+.orb-1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(124,109,240,0.18) 0%, transparent 70%);
+  top: -120px; left: 50%; transform: translateX(-60%);
+  animation-duration: 18s;
+}
+.orb-2 {
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(157,145,245,0.1) 0%, transparent 70%);
+  bottom: 60px; right: 8%;
+  animation-duration: 22s; animation-direction: reverse;
+}
+.orb-3 {
+  width: 240px; height: 240px;
+  background: radial-gradient(circle, rgba(80,70,200,0.12) 0%, transparent 70%);
+  top: 40%; left: 5%;
+  animation-duration: 26s;
+}
+@keyframes orbFloat {
+  0%   { transform: translateY(0px) scale(1); }
+  33%  { transform: translateY(-24px) scale(1.04); }
+  66%  { transform: translateY(12px) scale(0.97); }
+  100% { transform: translateY(0px) scale(1); }
+}
+
+/* ── Typewriter cursor ────────────────────────────────────────────── */
+.typewriter::after {
+  content: '|';
+  animation: twBlink 0.8s step-end infinite;
+  color: var(--violet-2);
+  margin-left: 2px;
+}
+@keyframes twBlink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* ── Stat counter animation ───────────────────────────────────────── */
+.count-up { display: inline-block; }
+
+/* ── Noise texture overlay ────────────────────────────────────────── */
+.noise-overlay {
+  position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none; opacity: 0.4; z-index: 0;
+}
+
+/* ── Card tilt on hover (JS-powered, base transition) ────────────── */
+.tilt-card { transition: transform 0.15s ease, box-shadow 0.15s ease; will-change: transform; }
+
+/* ── Gradient text ────────────────────────────────────────────────── */
+.grad-text {
+  background: linear-gradient(135deg, var(--violet-2) 0%, #c4b9ff 40%, var(--violet-2) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradShift 5s linear infinite;
+}
+@keyframes gradShift { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
+
+/* ── Glowing border pulse ─────────────────────────────────────────── */
+.glow-border {
+  position: relative;
+}
+.glow-border::before {
+  content: '';
+  position: absolute; inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--violet), transparent, var(--violet-2));
+  opacity: 0;
+  transition: opacity var(--t-slow) var(--ease);
+  z-index: -1;
+}
+.glow-border:hover::before { opacity: 1; }
+
+/* ── Feature card icon bounce ─────────────────────────────────────── */
+.feature-card:hover .feature-icon {
+  animation: iconBounce 0.4s var(--ease);
+}
+@keyframes iconBounce {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18) rotate(-4deg); }
+  70%  { transform: scale(0.95) rotate(2deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+/* ── Staggered list animation ─────────────────────────────────────── */
+.stagger-children > * {
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+}
+.stagger-children.in > *:nth-child(1) { opacity:1; transform:none; transition-delay:0.05s; }
+.stagger-children.in > *:nth-child(2) { opacity:1; transform:none; transition-delay:0.12s; }
+.stagger-children.in > *:nth-child(3) { opacity:1; transform:none; transition-delay:0.19s; }
+.stagger-children.in > *:nth-child(4) { opacity:1; transform:none; transition-delay:0.26s; }
+.stagger-children.in > *:nth-child(5) { opacity:1; transform:none; transition-delay:0.33s; }
+.stagger-children.in > *:nth-child(6) { opacity:1; transform:none; transition-delay:0.40s; }
+.stagger-children.in > *:nth-child(7) { opacity:1; transform:none; transition-delay:0.47s; }
+.stagger-children.in > *:nth-child(8) { opacity:1; transform:none; transition-delay:0.54s; }
+
+/* ── Progress bar fill ────────────────────────────────────────────── */
+.progress-bar {
+  height: 2px; background: var(--line); border-radius: 2px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; background: var(--violet);
+  width: 0; transition: width 1.2s var(--ease);
+  border-radius: 2px;
+}
+.progress-fill.animate { width: var(--target-width, 80%); }
+
+/* ── Scroll indicator ─────────────────────────────────────────────── */
+.scroll-indicator {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  font-size: 11px; font-family: var(--font-mono); color: var(--text-3);
+  letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+  animation: bounceDown 2s ease-in-out infinite;
+}
+.scroll-indicator svg { width: 16px; height: 16px; stroke: var(--text-3); fill: none; stroke-width: 2; }
+@keyframes bounceDown {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(5px); }
+}
+
+/* ── Chat message pop ─────────────────────────────────────────────── */
+@keyframes msgPop {
+  0%   { opacity:0; transform: translateY(10px) scale(0.97); }
+  60%  { transform: translateY(-2px) scale(1.01); }
+  100% { opacity:1; transform: none; }
+}
+.msg { animation: msgPop 0.25s var(--ease) both; }
+
+/* ── Ripple on click ──────────────────────────────────────────────── */
+.ripple-host { position: relative; overflow: hidden; }
+.ripple {
+  position: absolute; border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  transform: scale(0);
+  animation: rippleAnim 0.55s linear;
+  pointer-events: none;
+}
+@keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
+
+/* ── Smooth page nav ──────────────────────────────────────────────── */
+.page-out { animation: pageOut 0.25s var(--ease-out) forwards; }
+@keyframes pageOut { to { opacity:0; transform: translateY(-8px); } }
