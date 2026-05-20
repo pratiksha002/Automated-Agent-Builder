@@ -11,9 +11,9 @@ def build_agent_config(db: Session, agent_id: uuid.UUID) -> dict:
     Loads the agent, its model, and its active tools from the DB and
     returns a clean runtime dictionary consumed by the inference service.
 
-    This is the bridge between what's stored and what gets executed.
-    The inference service never touches ORM objects directly — it only
-    sees this dict.
+    Now includes provider, groq_model_id, and ollama_model_id so the
+    conversation service can route to the correct backend without
+    additional DB lookups.
 
     Returns:
     {
@@ -22,20 +22,13 @@ def build_agent_config(db: Session, agent_id: uuid.UUID) -> dict:
         "system_prompt": str,
         "model": {
             "id": UUID,
-            "groq_model_id": str,   # the exact string sent to Groq API
             "name": str,
+            "provider": str,              # 'groq' or 'ollama'
+            "groq_model_id": str | None,  # set for Groq models
+            "ollama_model_id": str | None # set for Ollama models
         },
-        "tools": [
-            {
-                "tool_name": str,
-                "tool_config": dict,
-            },
-            ...
-        ]
+        "tools": [{"tool_name": str, "tool_config": dict}, ...]
     }
-
-    Raises 404 if the agent doesn't exist or is soft deleted.
-    Raises 500 if the agent has no model attached (data integrity issue).
     """
     agent = get_agent_by_id(db, agent_id)
     if not agent:
@@ -53,19 +46,18 @@ def build_agent_config(db: Session, agent_id: uuid.UUID) -> dict:
     tools = get_agent_tools(db, agent_id)
 
     return {
-        "agent_id": agent.id,
-        "name": agent.name,
+        "agent_id":      agent.id,
+        "name":          agent.name,
         "system_prompt": agent.system_prompt,
         "model": {
-            "id": agent.model.id,
-            "groq_model_id": agent.model.groq_model_id,
-            "name": agent.model.name,
+            "id":              agent.model.id,
+            "name":            agent.model.name,
+            "provider":        agent.model.provider,
+            "groq_model_id":   agent.model.groq_model_id,
+            "ollama_model_id": agent.model.ollama_model_id,
         },
         "tools": [
-            {
-                "tool_name": t.tool_name,
-                "tool_config": t.tool_config or {},
-            }
+            {"tool_name": t.tool_name, "tool_config": t.tool_config or {}}
             for t in tools
         ],
     }

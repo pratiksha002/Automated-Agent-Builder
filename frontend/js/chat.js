@@ -1,4 +1,4 @@
-import { api } from './api.js';
+import { api, providerApi } from './api.js';
 import { toast, confirmDialog, relativeTime, formatTime } from './ui.js';
 
 if (!sessionStorage.getItem('token')) window.location.href = '/index.html';
@@ -24,22 +24,61 @@ const newBtn        = document.getElementById('new-chat-btn');
 const headerName    = document.getElementById('chat-agent-name');
 const headerSub     = document.getElementById('chat-agent-sub');
 const startersEl    = document.getElementById('starters');
-const welcomeTitle  = document.getElementById('chat-welcome-title');
+
+// Provider UI
+const providerBadge  = document.getElementById('provider-badge');
+const providerLabel  = document.getElementById('provider-label');
+const switchBtn      = document.getElementById('switch-provider-btn');
+const fallbackBanner = document.getElementById('fallback-banner');
+const fallbackClose  = document.getElementById('fallback-banner-close');
+
+let currentProvider = 'groq';
 
 // ── Init header ───────────────────────────────────────────────────────────
-if (headerName)  headerName.textContent = agentName;
-if (headerSub)   headerSub.textContent  = agentModel;
-if (welcomeTitle) welcomeTitle.textContent = `Chat with ${agentName}`;
+if (headerName) headerName.textContent = agentName;
+if (headerSub)  headerSub.textContent  = agentModel;
 
 document.getElementById('logout-btn')?.addEventListener('click', () => {
   sessionStorage.clear(); window.location.href = '/index.html';
+});
+
+// ── Provider UI helpers ───────────────────────────────────────────────────
+function updateProviderUI(provider) {
+  currentProvider = provider;
+  const isGroq = provider === 'groq';
+  if (providerBadge) providerBadge.className = `provider-badge ${provider}`;
+  if (providerLabel) providerLabel.textContent = isGroq ? 'Groq' : 'Ollama';
+  if (switchBtn) {
+    switchBtn.textContent = isGroq ? 'Switch to Ollama' : 'Switch to Groq';
+    switchBtn.title = isGroq
+      ? 'Switch to local Ollama inference (no rate limits)'
+      : 'Switch back to Groq cloud inference';
+  }
+}
+
+fallbackClose?.addEventListener('click', () => {
+  fallbackBanner?.classList.remove('show');
+});
+
+switchBtn?.addEventListener('click', async () => {
+  if (!activeCid) { toast('Start a conversation first.', 'info'); return; }
+  const target = currentProvider === 'groq' ? 'ollama' : 'groq';
+  switchBtn.disabled = true;
+  try {
+    const result = await providerApi.switch(activeCid, target);
+    updateProviderUI(result.provider);
+    toast(result.message, 'success', 4000);
+  } catch (err) {
+    toast(err.message, 'error');
+  } finally {
+    switchBtn.disabled = false;
+  }
 });
 
 // ── Greeting & agent-aware starters ──────────────────────────────────────
 const hour = new Date().getHours();
 const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
-// Starters adapt based on agent name keywords
 function getStarters(name) {
   const n = (name || '').toLowerCase();
   if (n.includes('support') || n.includes('help'))
@@ -77,7 +116,6 @@ function getStarters(name) {
       'What are the most important fundamentals to master first?',
       'Create a short study plan for me.',
     ];
-  // Default
   return [
     'What can you help me with today?',
     'Give me a quick overview of your capabilities.',
@@ -86,12 +124,10 @@ function getStarters(name) {
   ];
 }
 
-// ── Render starters ───────────────────────────────────────────────────────
 if (startersEl) {
   getStarters(agentName).forEach(s => {
     const btn = document.createElement('button');
-    btn.className = 'starter';
-    btn.textContent = s;
+    btn.className = 'starter'; btn.textContent = s;
     btn.addEventListener('click', () => {
       chatInput.value = s;
       chatInput.dispatchEvent(new Event('input'));
@@ -101,7 +137,7 @@ if (startersEl) {
   });
 }
 
-// Inject greeting message above starters
+// Inject greeting
 const greetingEl = document.getElementById('chat-greeting');
 if (greetingEl) {
   greetingEl.innerHTML = `
@@ -154,7 +190,7 @@ function attachCodeCopy(el) {
 }
 
 // ── Render message bubble ─────────────────────────────────────────────────
-function renderMessage(role, content, ts = null) {
+function renderMessage(role, content, ts = null, messageId = null) {
   const wrap = document.createElement('div');
   wrap.className = `msg ${role}`;
   const timeStr = ts ? formatTime(ts) : formatTime(new Date().toISOString());
@@ -168,7 +204,8 @@ function renderMessage(role, content, ts = null) {
       <div class="msg-actions">
         <span class="msg-time">${timeStr}</span>
         <button class="msg-act copy-btn" title="Copy message">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            style="width:11px;height:11px">
             <rect x="9" y="9" width="13" height="13" rx="2"/>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
           </svg>
@@ -219,15 +256,13 @@ function showTyping() {
   el.className = 'msg assistant'; el.id = 'typing';
   el.innerHTML = `
     <div class="msg-avatar">AI</div>
-    <div class="msg-content">
-      <div class="msg-bubble">
-        <div class="typing">
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
-        </div>
+    <div class="msg-content"><div class="msg-bubble">
+      <div class="typing">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
       </div>
-    </div>`;
+    </div></div>`;
   msgWrap.appendChild(el);
   msgWrap.scrollTop = msgWrap.scrollHeight;
 }
@@ -241,11 +276,14 @@ async function loadConv(id) {
     el.classList.toggle('active', el.dataset.id === id));
   if (welcomeEl)     welcomeEl.style.display     = 'none';
   if (chatContentEl) chatContentEl.style.display = 'flex';
+  if (fallbackBanner) fallbackBanner.classList.remove('show');
   try {
     const conv = await api.conversations.get(id);
+    // Sync provider badge to what was saved for this conversation
+    if (conv.current_provider) updateProviderUI(conv.current_provider);
     (conv.messages || [])
       .filter(m => m.role !== 'system')
-      .forEach(m => renderMessage(m.role, m.content, m.created_at));
+      .forEach(m => renderMessage(m.role, m.content, m.created_at, m.id));
     chatInput.focus();
   } catch (err) { toast(err.message, 'error'); }
 }
@@ -284,17 +322,18 @@ function renderSidebar(convs) {
       e.stopPropagation();
       const ok = await confirmDialog(
         'Delete conversation',
-        'This conversation and all its messages will be permanently deleted. This cannot be undone.'
+        'This conversation and all its messages will be permanently deleted.'
       );
       if (!ok) return;
       try {
         await api.conversations.delete(c.id);
         allConvs = allConvs.filter(x => x.id !== c.id);
         if (activeCid === c.id) {
-          activeCid = null;
-          msgWrap.innerHTML = '';
+          activeCid = null; msgWrap.innerHTML = '';
           if (welcomeEl)     welcomeEl.style.display     = 'flex';
           if (chatContentEl) chatContentEl.style.display = 'none';
+          if (fallbackBanner) fallbackBanner.classList.remove('show');
+          updateProviderUI('groq');
         }
         renderSidebar(filtered());
         toast('Conversation deleted', 'success');
@@ -329,18 +368,16 @@ searchInput?.addEventListener('input', () => renderSidebar(filtered()));
 
 // ── New chat ──────────────────────────────────────────────────────────────
 newBtn?.addEventListener('click', async () => {
-  if (!agentId) {
-    toast('No agent selected. Return to the dashboard.', 'error');
-    return;
-  }
+  if (!agentId) { toast('No agent selected. Return to the dashboard.', 'error'); return; }
   try {
     const c = await api.conversations.create(agentId);
     activeCid = c.id;
     msgWrap.innerHTML = '';
     if (welcomeEl)     welcomeEl.style.display     = 'flex';
     if (chatContentEl) chatContentEl.style.display = 'none';
+    if (fallbackBanner) fallbackBanner.classList.remove('show');
+    if (c.current_provider) updateProviderUI(c.current_provider);
     await loadSidebar();
-    // Show greeting in the fresh welcome state
     chatInput.focus();
   } catch (err) { toast(err.message, 'error'); }
 });
@@ -351,23 +388,20 @@ async function sendMessage() {
   const content = chatInput.value.trim();
   if (!content) return;
 
-  // Create conversation on first message if none exists
   if (!activeCid) {
     if (!agentId) { toast('No agent selected.', 'error'); return; }
     try {
       const c = await api.conversations.create(agentId);
       activeCid = c.id;
+      if (c.current_provider) updateProviderUI(c.current_provider);
       await loadSidebar();
     } catch (err) { toast(err.message, 'error'); return; }
   }
 
-  isSending = true;
-  sendBtn.disabled = true;
+  isSending = true; sendBtn.disabled = true;
   if (welcomeEl)     welcomeEl.style.display     = 'none';
   if (chatContentEl) chatContentEl.style.display = 'flex';
-
-  chatInput.value = '';
-  chatInput.style.height = 'auto';
+  chatInput.value = ''; chatInput.style.height = 'auto';
   if (charCountEl) charCountEl.textContent = '0';
 
   renderMessage('user', content);
@@ -376,6 +410,14 @@ async function sendMessage() {
   try {
     const res = await api.messages.send(activeCid, content);
     hideTyping();
+
+    // Update provider badge
+    if (res.provider) updateProviderUI(res.provider);
+
+    // Show fallback banner if Groq was rate-limited and Ollama took over
+    if (res.was_fallback && fallbackBanner) {
+      fallbackBanner.classList.add('show');
+    }
 
     // Build assistant wrapper
     const wrap = document.createElement('div');
@@ -388,7 +430,8 @@ async function sendMessage() {
         <div class="msg-actions">
           <span class="msg-time">${formatTime(now)}</span>
           <button class="msg-act copy-btn" title="Copy message">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              style="width:11px;height:11px">
               <rect x="9" y="9" width="13" height="13" rx="2"/>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
             </svg>
@@ -417,9 +460,7 @@ async function sendMessage() {
     renderMessage('assistant', `Something went wrong: ${err.message}`);
     toast(err.message, 'error');
   } finally {
-    isSending = false;
-    sendBtn.disabled = false;
-    chatInput.focus();
+    isSending = false; sendBtn.disabled = false; chatInput.focus();
   }
 }
 

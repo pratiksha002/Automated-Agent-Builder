@@ -1,6 +1,6 @@
 import uuid
 from typing import TYPE_CHECKING, List, Optional
-from sqlalchemy import String, Boolean, ForeignKey
+from sqlalchemy import String, Boolean, Text, ForeignKey, CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -14,12 +14,24 @@ if TYPE_CHECKING:
 
 class Conversation(Base):
     """
-    A single chat session between a user and an agent.
-    Acts as the container for messages. updated_at tracks the last
-    message time and is used to sort conversations by recency.
+    A persistent chat session between a user and an agent.
+
+    current_provider : which backend is currently handling inference
+                       ('groq' or 'ollama'). Starts as the agent's
+                       model provider. Switches automatically on Groq
+                       rate-limit or manually by the user.
+    provider_switched: True once an automatic fallback has occurred.
+                       Used by the frontend to show a notification.
     """
 
     __tablename__ = "conversations"
+
+    __table_args__ = (
+        CheckConstraint(
+            "current_provider IN ('groq', 'ollama')",
+            name="ck_conversation_provider",
+        ),
+    )
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -36,35 +48,40 @@ class Conversation(Base):
     )
 
     title: Mapped[Optional[str]] = mapped_column(
-        String(255),
+        String(200),
         nullable=True,
-        comment="Auto-generated from first user message, or manually set by user",
+        comment="Auto-generated from the first user message",
     )
 
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
         nullable=False,
-        comment="False for archived or closed conversations",
+    )
+
+    current_provider: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        default="groq",
+        comment="'groq' or 'ollama' — which backend is currently active",
+    )
+
+    provider_switched: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+        comment="True if an automatic fallback from Groq to Ollama occurred",
     )
 
     # Relationships
-    user: Mapped["User"] = relationship(
-        "User",
-        back_populates="conversations",
-    )
-
-    agent: Mapped["Agent"] = relationship(
-        "Agent",
-        back_populates="conversations",
-    )
-
+    user:     Mapped["User"]         = relationship("User")
+    agent:    Mapped["Agent"]        = relationship("Agent")
     messages: Mapped[List["Message"]] = relationship(
         "Message",
         back_populates="conversation",
-        cascade="all, delete-orphan",
         order_by="Message.created_at",
+        cascade="all, delete-orphan",
     )
 
     def __repr__(self) -> str:
-        return f"<Conversation id={self.id} user_id={self.user_id} agent_id={self.agent_id}>"
+        return f"<Conversation id={self.id} provider={self.current_provider}>"

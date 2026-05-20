@@ -21,6 +21,9 @@ export const api = {
     login:    (email, password)            => req('POST', '/api/v1/auth/login',    { email, password }, false),
     me:       ()                           => req('GET',  '/api/v1/auth/me'),
   },
+  models: {
+    list: () => req('GET', '/api/v1/models', null, false),
+  },
   agents: {
     list:   ()         => req('GET',    '/api/v1/agents'),
     get:    id         => req('GET',    `/api/v1/agents/${id}`),
@@ -37,4 +40,10 @@ export const api = {
   messages: {
     send: (cid, content) => req('POST', `/api/v1/conversations/${cid}/messages`, { content }),
   },
+};
+
+// Provider switch
+export const providerApi = {
+  switch: (conversationId, provider) =>
+    req('POST', `/api/v1/conversations/${conversationId}/switch-provider`, { provider }),
 };
