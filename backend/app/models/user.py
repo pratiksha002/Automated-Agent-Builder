@@ -42,6 +42,12 @@ class User(Base):
         nullable=False,
     )
 
+    is_banned: Mapped[bool] = mapped_column(
+        Boolean, 
+        default=False,
+        nullable=False
+    )
+
     # Relationships
     agents: Mapped[List["Agent"]] = relationship(
         "Agent",

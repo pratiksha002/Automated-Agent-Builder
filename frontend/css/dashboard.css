@@ -174,3 +174,70 @@
   background: var(--danger-bg);
   color: var(--danger);
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   ADMIN COMPATIBILITY ALIASES
+   Teammate's admin pages use .layout, .agent-card-header,
+   .agent-card-model etc. These map to our existing styles.
+═══════════════════════════════════════════════════════════════════ */
+
+/* Layout alias: .layout → .app-layout */
+.layout {
+  display: grid;
+  grid-template-rows: 60px 1fr;
+  min-height: 100vh;
+}
+
+/* Page header aliases */
+.page-title    { font-family: var(--font-display); font-size: 30px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); margin-bottom: 4px; }
+.page-subtitle { font-size: 14px; color: var(--text-3); font-family: var(--font-body); }
+
+/* Agent card structure aliases */
+.agent-card-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 10px;
+}
+.agent-card-model {
+  font-size: 11px; color: var(--text-3); font-family: var(--font-mono);
+}
+
+/* Navbar user alias */
+.navbar-user {
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-3);
+  padding: 4px 12px; border-radius: 99px; border: 1px solid var(--line);
+  background: var(--ink-2);
+}
+
+/* Tags aliases (flat versions teammate may use) */
+.tag-platform {
+  background: rgba(124,109,240,0.1); color: var(--violet-2);
+  border: 1px solid rgba(124,109,240,0.25); font-family: var(--font-mono);
+  font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 99px;
+}
+.tag-user {
+  background: var(--ink-3); color: var(--text-3);
+  border: 1px solid var(--line); font-family: var(--font-mono);
+  font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 99px;
+}
+
+/* Action button aliases for admin card buttons */
+.agent-card-actions button {
+  background: var(--ink-3); border: 1px solid var(--line);
+  color: var(--text-3); font-size: 12px; font-family: var(--font-body);
+  cursor: pointer; padding: 4px 10px; border-radius: var(--r-sm);
+  transition: all var(--t) var(--ease);
+}
+.agent-card-actions button:hover {
+  color: var(--text); border-color: var(--line-hi); background: var(--line);
+}
+.agent-card-actions .delete-btn:hover {
+  color: var(--danger); border-color: rgba(240,92,92,0.3); background: var(--danger-bg);
+}
+
+/* Empty state alias */
+.empty-state {
+  grid-column: 1 / -1; color: var(--text-3);
+  font-size: 13px; font-family: var(--font-mono); padding: 32px 0;
+}

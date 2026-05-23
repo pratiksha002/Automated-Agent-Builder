@@ -7,6 +7,9 @@ from .conversation import Conversation
 from .message import Message
 from .message_feedback import MessageFeedback
 from .api_key import APIKey
+from .admin import Admin
+from .usage_log import UsageLog
+from .flag import Flag
 
 __all__ = [
     "Base", "User", "Model", "Agent", "AgentTool",
