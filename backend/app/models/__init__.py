@@ -6,6 +6,9 @@ from .agent_tool import AgentTool
 from .conversation import Conversation
 from .message import Message
 from .api_key import APIKey
+from .admin import Admin
+from .usage_log import UsageLog
+from .flag import Flag
 
 __all__ = [
     "Base",

@@ -2,3 +2,14 @@ groq
 tiktoken
 alembic
 slowapi
+bcrypt==4.0.1
+uvicorn
+fastapi
+pydantic_settings
+sqlalchemy
+psycopg2-binary
+python-dotenv
+pytest
+pytest-asyncio
+pydantic
+jose
