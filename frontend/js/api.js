@@ -47,3 +47,11 @@ export const providerApi = {
   switch: (conversationId, provider) =>
     req('POST', `/api/v1/conversations/${conversationId}/switch-provider`, { provider }),
 };
+
+// Feedback
+export const feedbackApi = {
+  submit:         (messageId, rating)              => req('POST', `/api/v1/messages/${messageId}/feedback`, { rating }),
+  getForAgent:    (agentId)                        => req('GET',  `/api/v1/agents/${agentId}/feedback`),
+  getSuggestions: (agentId)                        => req('POST', `/api/v1/agents/${agentId}/feedback/suggestions`),
+  apply:          (agentId, feedbackId, new_prompt) => req('POST', `/api/v1/agents/${agentId}/feedback/${feedbackId}/apply`, { new_prompt }),
+};

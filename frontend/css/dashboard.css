@@ -67,13 +67,15 @@
   flex: 1; margin-bottom: 20px; min-height: 44px;
 }
 .agent-card-footer {
-  display: flex; align-items: center; justify-content: space-between;
   padding-top: 16px; border-top: 1px solid var(--line); margin-top: auto;
+  display: flex; align-items: center; justify-content: space-between;
 }
 .agent-card-meta {
   font-size: 11.5px; color: var(--text-3); font-family: var(--font-mono);
 }
-.agent-card-actions { display: flex; gap: 8px; align-items: center; }
+.agent-card-actions {
+  display: flex; gap: 8px; align-items: center;
+}
 
 /* ─── Skeleton ────────────────────────────────────────────────────── */
 .skeleton-card { height: 180px; border-radius: var(--r-xl); }
@@ -87,3 +89,88 @@
 .empty-state svg { width: 36px; height: 36px; stroke: var(--text-3); fill: none; stroke-width: 1.5; margin-bottom: 4px; }
 .empty-state-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--text-2); }
 .empty-state p { font-size: 13.5px; color: var(--text-3); }
+
+/* ─── 3-dot card menu ─────────────────────────────────────────────── */
+.card-menu-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.card-menu-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3.5px;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r);
+  border: 1px solid var(--line);
+  background: var(--ink-3);
+  cursor: pointer;
+  transition: all var(--t) var(--ease);
+  padding: 0;
+  flex-shrink: 0;
+}
+.card-menu-btn span {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text-3);
+  transition: background var(--t) var(--ease);
+  pointer-events: none;
+}
+.card-menu-btn:hover {
+  border-color: var(--violet);
+  background: rgba(124,109,240,0.08);
+}
+.card-menu-btn:hover span { background: var(--violet-2); }
+
+.card-dropdown {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 0;
+  min-width: 170px;
+  background: var(--ink-2);
+  border: 1px solid var(--line-hi);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  display: none;
+  z-index: 50;
+  animation: dropUp 150ms var(--ease);
+}
+.card-dropdown.open { display: block; }
+
+@keyframes dropUp {
+  from { opacity: 0; transform: translateY(6px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+.card-dropdown-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 13.5px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  color: var(--text-2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--t) var(--ease);
+}
+.card-dropdown-item:hover {
+  background: var(--ink-3);
+  color: var(--text);
+}
+.card-dropdown-item.danger {
+  color: var(--danger);
+}
+.card-dropdown-item.danger:hover {
+  background: var(--danger-bg);
+  color: var(--danger);
+}

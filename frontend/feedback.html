@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Feedback — Agentive</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <link rel="stylesheet" href="css/dashboard.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
+  <style>
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 12px; margin-bottom: 36px;
+    }
+    @media(max-width:700px) { .stats-row { grid-template-columns: repeat(2,1fr); } }
+
+    .stat-box {
+      background: var(--ink-2); border: 1px solid var(--line);
+      border-radius: var(--r-lg); padding: 18px 20px;
+      transition: border-color var(--t-slow) var(--ease);
+    }
+    .stat-box:hover { border-color: rgba(124,109,240,0.3); }
+    .stat-num {
+      font-family: var(--font-display); font-size: 32px; font-weight: 800;
+      letter-spacing: -0.04em; line-height: 1; margin-bottom: 4px;
+    }
+    .stat-lbl { font-size: 11.5px; color: var(--text-3); font-family: var(--font-mono); }
+
+    /* ── Generate bar ── */
+    .generate-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 20px; padding: 18px 22px;
+      background: rgba(124,109,240,0.05); border: 1px solid rgba(124,109,240,0.2);
+      border-radius: var(--r-lg); margin-bottom: 28px;
+    }
+    .generate-bar p { font-size: 14px; color: var(--text-2); line-height: 1.5; }
+
+    /* ── Feedback cards ── */
+    .fb-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .fb-card {
+      background: var(--ink-2); border: 1px solid var(--line);
+      border-radius: var(--r-lg); padding: 20px 24px;
+      transition: border-color var(--t-slow) var(--ease);
+    }
+    .fb-card.is-down { border-left: 3px solid var(--danger); }
+    .fb-card.is-up   { border-left: 3px solid var(--success); }
+    .fb-card.applied { opacity: 0.45; pointer-events: none; }
+
+    .fb-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+    }
+    .fb-rating { font-size: 17px; flex-shrink: 0; }
+    .fb-meta { font-size: 11.5px; color: var(--text-3); font-family: var(--font-mono); }
+    .applied-tag {
+      margin-left: auto; font-size: 10px; font-family: var(--font-mono);
+      font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+      color: var(--success); background: rgba(74,222,128,0.08);
+      border: 1px solid rgba(74,222,128,0.2); padding: 2px 9px;
+      border-radius: 99px;
+    }
+    .fb-message {
+      font-size: 13.5px; color: var(--text-2); line-height: 1.65;
+      background: var(--ink-3); border: 1px solid var(--line);
+      border-radius: var(--r); padding: 12px 16px;
+      font-style: italic; margin-bottom: 0;
+    }
+
+    /* ── Suggestion box ── */
+    .suggestion-box {
+      margin-top: 14px; padding: 16px 18px;
+      background: rgba(124,109,240,0.05);
+      border: 1px solid rgba(124,109,240,0.2);
+      border-radius: var(--r);
+    }
+    .suggestion-eyebrow {
+      font-size: 10px; font-family: var(--font-mono); font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--violet-2); margin-bottom: 10px;
+    }
+    .suggestion-textarea {
+      width: 100%; background: var(--ink-3); border: 1px solid var(--line);
+      border-radius: var(--r-sm); padding: 10px 14px;
+      font-family: var(--font-mono); font-size: 12.5px; color: var(--text);
+      resize: vertical; min-height: 88px; line-height: 1.65; outline: none;
+      transition: border-color var(--t) var(--ease), box-shadow var(--t) var(--ease);
+    }
+    .suggestion-textarea:focus {
+      border-color: var(--violet);
+      box-shadow: 0 0 0 3px var(--violet-glow);
+    }
+    .suggestion-actions {
+      display: flex; gap: 8px; margin-top: 10px; justify-content: flex-end;
+    }
+
+    /* ── Empty state ── */
+    .fb-empty {
+      text-align: center; padding: 64px 20px;
+      border: 1px dashed var(--line-hi); border-radius: var(--r-xl);
+      color: var(--text-3); font-family: var(--font-mono); font-size: 13px;
+    }
+    .fb-empty-title {
+      font-family: var(--font-display); font-size: 18px; font-weight: 700;
+      color: var(--text-2); margin-bottom: 8px;
+    }
+
+    /* ── How it works banner ── */
+    .how-banner {
+      background: var(--ink-2); border: 1px solid var(--line);
+      border-radius: var(--r-lg); padding: 20px 24px; margin-bottom: 32px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+      gap: 20px;
+    }
+    .how-step { display: flex; align-items: flex-start; gap: 12px; }
+    .how-num {
+      width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(124,109,240,0.12); border: 1px solid rgba(124,109,240,0.25);
+      display: grid; place-items: center;
+      font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+      color: var(--violet-2);
+    }
+    .how-text { font-size: 13px; color: var(--text-2); line-height: 1.55; }
+    .how-text strong { color: var(--text); font-weight: 600; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <nav class="navbar">
+    <div class="navbar-logo">Agent<span>ive</span></div>
+    <div class="navbar-right">
+      <button class="btn btn-ghost btn-sm"
+        onclick="window.location.href='dashboard.html'">← Dashboard</button>
+      <button class="btn btn-ghost btn-sm" id="logout-btn">Sign out</button>
+    </div>
+  </nav>
+
+  <main class="main" style="max-width:920px">
+
+    <div class="page-header" data-fade>
+      <div class="page-header-left">
+        <div class="page-eyebrow">Feedback</div>
+        <h1 class="page-title" id="page-title">Agent Feedback</h1>
+        <p class="page-sub">
+          Rate responses in chat — the agent analyses thumbs-down messages
+          and suggests targeted improvements to its system prompt.
+          Works for both Groq and Ollama responses.
+        </p>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="how-banner" data-fade data-delay="1">
+      <div class="how-step">
+        <div class="how-num">1</div>
+        <div class="how-text"><strong>Rate responses</strong> — thumbs up or down on any assistant message in chat</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">2</div>
+        <div class="how-text"><strong>Generate suggestions</strong> — the LLM analyses thumbs-down messages and proposes a prompt fix</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">3</div>
+        <div class="how-text"><strong>Apply the fix</strong> — update the agent's system prompt, instantly improving future responses on both Groq and Ollama</div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row" id="stats-row" data-fade data-delay="2">
+      <div class="stat-box">
+        <div class="stat-num" id="s-total">—</div>
+        <div class="stat-lbl">Total ratings</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="s-score" style="color:var(--violet-2)">—</div>
+        <div class="stat-lbl">Satisfaction</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="s-up" style="color:var(--success)">—</div>
+        <div class="stat-lbl">Thumbs up</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="s-down" style="color:var(--danger)">—</div>
+        <div class="stat-lbl">Thumbs down</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="s-applied" style="color:var(--success)">—</div>
+        <div class="stat-lbl">Improvements applied</div>
+      </div>
+    </div>
+
+    <!-- Generate suggestions bar -->
+    <div class="generate-bar" id="generate-bar" style="display:none" data-fade data-delay="3">
+      <p id="generate-desc"></p>
+      <button class="btn btn-primary" id="generate-btn" style="flex-shrink:0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          style="width:14px;height:14px">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        Generate suggestions
+      </button>
+    </div>
+
+    <!-- Feedback list -->
+    <div class="fb-list" id="fb-list" data-fade data-delay="3"></div>
+
+  </main>
+</div>
+
+<script type="module">
+import { api, feedbackApi } from './js/api.js';
+import { toast, confirmDialog } from './js/ui.js';
+
+if (!sessionStorage.getItem('token')) window.location.href = '/index.html';
+
+document.getElementById('logout-btn')?.addEventListener('click', () => {
+  sessionStorage.clear(); window.location.href = '/index.html';
+});
+
+const params    = new URLSearchParams(location.search);
+const agentId   = params.get('agent');
+const agentName = params.get('name') || 'Agent';
+
+if (!agentId) { window.location.href = '/dashboard.html'; }
+
+document.getElementById('page-title').textContent = `${agentName} — Feedback`;
+
+// ── Load ─────────────────────────────────────────────────────────────────
+async function load() {
+  try {
+    const data = await feedbackApi.getForAgent(agentId);
+    renderStats(data.stats || {});
+    renderList(data.feedback || []);
+
+    const pending = data.stats?.pending || 0;
+    const bar = document.getElementById('generate-bar');
+    if (pending > 0) {
+      bar.style.display = 'flex';
+      document.getElementById('generate-desc').textContent =
+        `${pending} thumbs-down response${pending > 1 ? 's' : ''} without improvement suggestions yet. ` +
+        `Click to generate AI-powered prompt improvements using the agent's own model.`;
+    } else {
+      bar.style.display = 'none';
+    }
+  } catch (err) {
+    toast(err.message, 'error');
+  }
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────
+function renderStats(s) {
+  document.getElementById('s-total').textContent   = s.total   ?? '—';
+  document.getElementById('s-score').textContent   = s.score != null ? s.score + '%' : '—';
+  document.getElementById('s-up').textContent      = s.up      ?? '—';
+  document.getElementById('s-down').textContent    = s.down    ?? '—';
+  document.getElementById('s-applied').textContent = s.applied ?? '—';
+}
+
+// ── List ─────────────────────────────────────────────────────────────────
+function renderList(items) {
+  const container = document.getElementById('fb-list');
+  container.innerHTML = '';
+
+  if (!items.length) {
+    container.innerHTML = `
+      <div class="fb-empty">
+        <div class="fb-empty-title">No feedback yet</div>
+        <p>
+          Thumbs up / down buttons appear on hover on every assistant message in chat.<br>
+          Ratings from both Groq and Ollama responses are collected here.
+        </p>
+      </div>`;
+    return;
+  }
+
+  // Sort: unapplied thumbs-down first, then thumbs-up, then applied
+  const sorted = [...items].sort((a, b) => {
+    if (a.applied !== b.applied) return a.applied ? 1 : -1;
+    if (a.rating  !== b.rating)  return a.rating === 'down' ? -1 : 1;
+    return new Date(b.created_at) - new Date(a.created_at);
+  });
+
+  sorted.forEach(fb => {
+    const card = document.createElement('div');
+    card.className = `fb-card is-${fb.rating}${fb.applied ? ' applied' : ''}`;
+
+    const when = new Date(fb.created_at).toLocaleString(undefined, {
+      month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    });
+
+    card.innerHTML = `
+      <div class="fb-header">
+        <span class="fb-rating">${fb.rating === 'up' ? '👍' : '👎'}</span>
+        <span class="fb-meta">${when}</span>
+        ${fb.applied ? '<span class="applied-tag">Improvement applied</span>' : ''}
+      </div>
+      <div class="fb-message">${escHtml(fb.message_content || '(message not available)')}</div>
+      ${fb.rating === 'down' && !fb.applied && fb.suggestion ? renderSuggestion(fb) : ''}`;
+
+    if (fb.rating === 'down' && !fb.applied && fb.suggestion) {
+      card.querySelector('.apply-btn')?.addEventListener('click', () => applyIt(fb.id, card));
+      card.querySelector('.dismiss-btn')?.addEventListener('click', () => {
+        card.querySelector('.suggestion-box').remove();
+      });
+    }
+
+    container.appendChild(card);
+  });
+}
+
+function renderSuggestion(fb) {
+  return `
+    <div class="suggestion-box">
+      <div class="suggestion-eyebrow">AI-suggested prompt improvement</div>
+      <textarea class="suggestion-textarea" id="sug-${fb.id}">${escHtml(fb.suggestion)}</textarea>
+      <div class="suggestion-actions">
+        <button class="btn btn-ghost btn-sm dismiss-btn">Dismiss</button>
+        <button class="btn btn-primary btn-sm apply-btn">
+          Apply to agent prompt →
+        </button>
+      </div>
+    </div>`;
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Apply ─────────────────────────────────────────────────────────────────
+async function applyIt(feedbackId, card) {
+  const ta = card.querySelector(`#sug-${feedbackId}`);
+  const newPrompt = ta?.value?.trim();
+  if (!newPrompt) { toast('Prompt cannot be empty', 'error'); return; }
+
+  const ok = await confirmDialog(
+    'Apply improvement',
+    "This updates the agent's system prompt immediately. " +
+    "All future conversations — on both Groq and Ollama — will use the new prompt.",
+    'Apply', false,
+  );
+  if (!ok) return;
+
+  try {
+    await feedbackApi.apply(agentId, feedbackId, newPrompt);
+    toast('Prompt updated. The agent will use this for all future responses.', 'success', 4500);
+    await load();
+  } catch (err) { toast(err.message, 'error'); }
+}
+
+// ── Generate ──────────────────────────────────────────────────────────────
+document.getElementById('generate-btn')?.addEventListener('click', async () => {
+  const btn = document.getElementById('generate-btn');
+  btn.disabled = true;
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;animation:spin 0.8s linear infinite"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Generating…`;
+
+  try {
+    const result = await feedbackApi.getSuggestions(agentId);
+    if (result.generated === 0) {
+      toast('No new thumbs-down feedback to analyse.', 'info');
+    } else {
+      toast(
+        `${result.generated} suggestion${result.generated > 1 ? 's' : ''} generated. Review below.`,
+        'success', 4000,
+      );
+      await load();
+    }
+  } catch (err) {
+    toast(err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Generate suggestions`;
+  }
+});
+
+// Add spin keyframe for the loading icon
+const style = document.createElement('style');
+style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+document.head.appendChild(style);
+
+load();
+</script>
+<script type="module" src="js/animations.js"></script>
+</body>
+</html>

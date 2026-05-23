@@ -1,4 +1,4 @@
-import { api, providerApi } from './api.js';
+import { api, providerApi, feedbackApi } from './api.js';
 import { toast, confirmDialog, relativeTime, formatTime } from './ui.js';
 
 if (!sessionStorage.getItem('token')) window.location.href = '/index.html';
@@ -197,6 +197,12 @@ function renderMessage(role, content, ts = null, messageId = null) {
   const initials = role === 'user' ? 'You' : 'AI';
   const html = role === 'assistant' ? renderMd(content) : `<p>${escHtml(content)}</p>`;
 
+  const thumbsHtml = (role === 'assistant' && messageId) ? `
+    <div class="feedback-btns">
+      <button class="thumb-btn" data-rate="up"   title="Good response">&#128077;</button>
+      <button class="thumb-btn" data-rate="down" title="Bad response">&#128078;</button>
+    </div>` : '';
+
   wrap.innerHTML = `
     <div class="msg-avatar">${initials}</div>
     <div class="msg-content">
@@ -211,9 +217,11 @@ function renderMessage(role, content, ts = null, messageId = null) {
           </svg>
           Copy
         </button>
+        ${thumbsHtml}
       </div>
     </div>`;
 
+  // Wire copy button
   wrap.querySelector('.copy-btn').addEventListener('click', () => {
     navigator.clipboard.writeText(content).then(() => {
       const btn = wrap.querySelector('.copy-btn');
@@ -224,6 +232,24 @@ function renderMessage(role, content, ts = null, messageId = null) {
       }, 2000);
     });
   });
+
+  // Wire feedback thumbs
+  if (role === 'assistant' && messageId) {
+    wrap.querySelectorAll('.thumb-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const rating = btn.dataset.rate;
+        try {
+          await feedbackApi.submit(messageId, rating);
+          // Visual state — clear both, activate clicked one
+          wrap.querySelectorAll('.thumb-btn').forEach(b => b.className = 'thumb-btn');
+          btn.classList.add(rating);
+          if (rating === 'down') {
+            toast('Thanks — this helps improve the agent prompt.', 'info', 3000);
+          }
+        } catch (err) { toast(err.message, 'error'); }
+      });
+    });
+  }
 
   attachCodeCopy(wrap);
   msgWrap.appendChild(wrap);
@@ -437,6 +463,10 @@ async function sendMessage() {
             </svg>
             Copy
           </button>
+          <div class="feedback-btns">
+            <button class="thumb-btn" data-rate="up"   title="Good response">&#128077;</button>
+            <button class="thumb-btn" data-rate="down" title="Bad response">&#128078;</button>
+          </div>
         </div>
       </div>`;
 
@@ -450,6 +480,21 @@ async function sendMessage() {
         }, 2000);
       });
     });
+
+    // Wire feedback thumbs on the new streamed message
+    if (res.id) {
+      wrap.querySelectorAll('.thumb-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const rating = btn.dataset.rate;
+          try {
+            await feedbackApi.submit(res.id, rating);
+            wrap.querySelectorAll('.thumb-btn').forEach(b => b.className = 'thumb-btn');
+            btn.classList.add(rating);
+            if (rating === 'down') toast('Thanks — this helps improve the agent prompt.', 'info', 3000);
+          } catch (err) { toast(err.message, 'error'); }
+        });
+      });
+    }
 
     msgWrap.appendChild(wrap);
     await streamInto(wrap.querySelector('.msg-bubble'), res.content);

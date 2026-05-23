@@ -5,15 +5,10 @@ from .agent import Agent
 from .agent_tool import AgentTool
 from .conversation import Conversation
 from .message import Message
+from .message_feedback import MessageFeedback
 from .api_key import APIKey
 
 __all__ = [
-    "Base",
-    "User",
-    "Model",
-    "Agent",
-    "AgentTool",
-    "Conversation",
-    "Message",
-    "APIKey",
+    "Base", "User", "Model", "Agent", "AgentTool",
+    "Conversation", "Message", "MessageFeedback", "APIKey",
 ]

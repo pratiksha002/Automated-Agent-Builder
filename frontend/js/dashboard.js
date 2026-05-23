@@ -71,28 +71,36 @@ function svgIcon(type) {
 function renderCard(agent) {
   const card = document.createElement('div');
   card.className = 'agent-card';
-  const modelName = modelMap[agent.model_id] || 'Language Model';
+  const modelName   = modelMap[agent.model_id] || 'Language Model';
+  const platformTag = agent.is_platform_agent ? 'Platform' : 'Custom';
+  const tagClass    = agent.is_platform_agent ? 'tag-platform' : 'tag-user';
 
-  card.innerHTML = `
-    <div class="agent-card-top">
-      <div class="agent-card-name">${agent.name}</div>
-      <span class="tag ${agent.is_platform_agent ? 'tag-platform' : 'tag-user'}">
-        ${agent.is_platform_agent ? 'Platform' : 'Custom'}
-      </span>
-    </div>
-    <p class="agent-card-desc">${agent.description || 'No description provided.'}</p>
-    <div class="agent-card-footer">
-      <span class="agent-card-meta">${modelName}</span>
-      <div class="agent-card-actions">
-        <button class="btn btn-sm btn-primary chat-btn">
-          ${svgIcon('chat')} Chat
-        </button>
-        ${!agent.is_platform_agent
-          ? `<button class="btn btn-sm btn-danger del-btn" title="Delete agent">${svgIcon('trash')}</button>`
-          : ''}
-      </div>
-    </div>`;
+  // Footer: Chat button + 3-dot menu (custom agents only)
+  const menuBtn = !agent.is_platform_agent
+    ? '<button class="card-menu-btn" title="More options" aria-label="More options">'
+      + '<span></span><span></span><span></span>'
+      + '</button>'
+      + '<div class="card-dropdown">'
+      + '<button class="card-dropdown-item fb-item">Feedback &amp; Improve</button>'
+      + '<button class="card-dropdown-item del-item danger">Delete agent</button>'
+      + '</div>'
+    : '';
 
+  card.innerHTML =
+    '<div class="agent-card-top">'
+    + '<div class="agent-card-name">' + agent.name + '</div>'
+    + '<span class="tag ' + tagClass + '">' + platformTag + '</span>'
+    + '</div>'
+    + '<p class="agent-card-desc">' + (agent.description || 'No description provided.') + '</p>'
+    + '<div class="agent-card-footer">'
+    + '<span class="agent-card-meta">' + modelName + '</span>'
+    + '<div class="agent-card-actions">'
+    + '<button class="btn btn-sm btn-primary chat-btn">Chat</button>'
+    + '<div class="card-menu-wrap">' + menuBtn + '</div>'
+    + '</div>'
+    + '</div>';
+
+  // Chat
   card.querySelector('.chat-btn').addEventListener('click', e => {
     e.stopPropagation();
     sessionStorage.setItem('active_agent_id',    agent.id);
@@ -101,21 +109,46 @@ function renderCard(agent) {
     window.location.href = '/chat.html';
   });
 
-  card.querySelector('.del-btn')?.addEventListener('click', async e => {
+  // 3-dot toggle
+  const menuWrap  = card.querySelector('.card-menu-wrap');
+  const menuBtnEl = card.querySelector('.card-menu-btn');
+  const dropdown  = card.querySelector('.card-dropdown');
+
+  if (menuBtnEl && dropdown) {
+    menuBtnEl.addEventListener('click', e => {
+      e.stopPropagation();
+      const isOpen = dropdown.classList.contains('open');
+      // Close all other open dropdowns
+      document.querySelectorAll('.card-dropdown.open').forEach(d => d.classList.remove('open'));
+      if (!isOpen) dropdown.classList.add('open');
+    });
+  }
+
+  // Feedback
+  card.querySelector('.fb-item')?.addEventListener('click', e => {
     e.stopPropagation();
-    const ok = await confirmDialog('Delete agent', `"${agent.name}" will be permanently deleted. This action cannot be undone.`);
+    window.location.href = '/feedback.html?agent=' + agent.id + '&name=' + encodeURIComponent(agent.name);
+  });
+
+  // Delete
+  card.querySelector('.del-item')?.addEventListener('click', async e => {
+    e.stopPropagation();
+    if (dropdown) dropdown.classList.remove('open');
+    const ok = await confirmDialog('Delete agent', '"' + agent.name + '" will be permanently deleted. This cannot be undone.');
     if (!ok) return;
     try {
       await api.agents.delete(agent.id);
       card.style.transition = 'opacity 200ms, transform 200ms';
-      card.style.opacity = '0'; card.style.transform = 'scale(0.96)';
+      card.style.opacity = '0';
+      card.style.transform = 'scale(0.96)';
       setTimeout(() => card.remove(), 220);
-      toast(`"${agent.name}" deleted`, 'success');
+      toast('"' + agent.name + '" deleted', 'success');
     } catch (err) { toast(err.message, 'error'); }
   });
 
   return card;
 }
+
 
 async function loadAgents() {
   skeletons(platformGrid, 3); skeletons(userGrid, 2);
@@ -149,3 +182,8 @@ async function loadUser() {
 }
 
 loadUser(); loadAgents();
+
+// Close any open dropdown when clicking outside a card
+document.addEventListener('click', () => {
+  document.querySelectorAll('.card-dropdown.open').forEach(d => d.classList.remove('open'));
+});
