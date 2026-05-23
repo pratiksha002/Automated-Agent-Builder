@@ -2,6 +2,7 @@
 .env
 .env.local
 .env.*.local
+backend/.env
 !.env.example
 
 # ─── PYTHON ──────────────────────────────────────────────────────────────────
@@ -127,3 +128,5 @@ log/
 *.temp
 .cache/
 .parcel-cache/
+
+Automated-Agent-Builder/
