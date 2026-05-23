@@ -178,4 +178,4 @@ def run_seed(db: Session) -> None:
     seed_platform_agents(db, model_map)
     groq_count   = sum(1 for m in model_map.values() if m.provider == "groq")
     ollama_count = sum(1 for m in model_map.values() if m.provider == "ollama")
-    print(f"✓ Seed complete: {groq_count} Groq models, {ollama_count} Ollama models, platform agents loaded.")
+    print(f"[OK] Seed complete: {groq_count} Groq models, {ollama_count} Ollama models, platform agents loaded.")
