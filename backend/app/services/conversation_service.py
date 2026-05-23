@@ -2,6 +2,7 @@
 conversation_service.py — chat turn orchestrator with Groq→Ollama fallback.
 """
 import logging
+import time
 import uuid
 from typing import Optional
 
@@ -20,6 +21,7 @@ from app.services.inference_service import (
     call_llm, call_ollama, is_groq_rate_limited, count_tokens,
 )
 from app.models.conversation import Conversation
+from app.models.usage_log import UsageLog
 
 logger = logging.getLogger(__name__)
 _TITLE_MAX = 60
@@ -48,6 +50,34 @@ def _set_provider(db: Session, conv: Conversation, provider: str) -> None:
     logger.info(f"provider switched to {provider} conv={conv.id}")
 
 
+def _log_usage(
+    db: Session,
+    conv: Conversation,
+    provider_used: str,
+    user_message: str,
+    response: str,
+    response_time_ms: int,
+) -> None:
+    """Write one UsageLog row for this chat turn."""
+    try:
+        log = UsageLog(
+            user_id=conv.user_id,
+            agent_id=conv.agent_id,
+            conversation_id=conv.id,
+            model_id=None,               # optional — can resolve later if needed
+            model_provider=provider_used,
+            input_tokens=count_tokens(user_message),
+            output_tokens=count_tokens(response),
+            response_time_ms=response_time_ms,
+        )
+        db.add(log)
+        db.commit()
+    except Exception as e:
+        # Never let logging failure break the chat turn
+        logger.warning(f"UsageLog write failed: {e}")
+        db.rollback()
+
+
 def switch_provider(db: Session, conversation_id: uuid.UUID, provider: str) -> Conversation:
     """Manual provider switch from API route."""
     if provider not in ("groq", "ollama"):
@@ -70,7 +100,6 @@ def handle_chat_turn(
     """
     Runs one chat turn. Returns (response, message_id, provider_used, was_fallback).
     was_fallback=True means Groq was rate-limited and Ollama took over automatically.
-    The full conversation history is passed to whichever provider handles the turn.
     """
     # 1. Load conversation
     conv = get_conversation_by_id(db, conversation_id)
@@ -87,7 +116,6 @@ def handle_chat_turn(
 
     active_model_id = groq_model_id if current_provider == "groq" else ollama_model_id
 
-    # If model_id missing for requested provider, find Ollama fallback
     if not active_model_id and current_provider == "ollama":
         fb = _get_ollama_fallback(db)
         if not fb:
@@ -97,19 +125,20 @@ def handle_chat_turn(
     # 3. Save user message
     user_msg = add_message(db, conversation_id, "user", user_message, count_tokens(user_message))
 
-    # 4. Fetch full history (includes message just saved)
+    # 4. Fetch full history
     history = get_conversation_history(db, conversation_id)
 
     # 5. Trim to context window
-    ctx    = get_model_context_window(active_model_id, current_provider)
+    ctx     = get_model_context_window(active_model_id, current_provider)
     trimmed = trim_history(history, ctx, system_prompt)
 
-    # 6. Format (identical format for Groq and Ollama)
+    # 6. Format
     formatted = format_messages_for_llm(system_prompt, trimmed)
 
-    # 7. Call LLM — with automatic Groq→Ollama fallback on 429
+    # 7. Call LLM — track response time for usage logging
     was_fallback  = False
     provider_used = current_provider
+    t_start       = time.monotonic()
 
     try:
         response = call_llm(current_provider, active_model_id, formatted)
@@ -125,11 +154,11 @@ def handle_chat_turn(
                     "Install Ollama (ollama.com) and run: ollama pull llama3.2")
 
             fb_provider, fb_model = fb
-            fb_ctx      = get_model_context_window(fb_model, "ollama")
-            fb_history  = trim_history(history, fb_ctx, system_prompt)
+            fb_ctx       = get_model_context_window(fb_model, "ollama")
+            fb_history   = trim_history(history, fb_ctx, system_prompt)
             fb_formatted = format_messages_for_llm(system_prompt, fb_history)
 
-            response = call_ollama(fb_model, fb_formatted)   # raises if Ollama also fails
+            response = call_ollama(fb_model, fb_formatted)
 
             _set_provider(db, conv, "ollama")
             provider_used = "ollama"
@@ -137,17 +166,22 @@ def handle_chat_turn(
         else:
             raise
 
+    response_time_ms = int((time.monotonic() - t_start) * 1000)
+
     # 8. Save assistant response
     asst_msg = add_message(db, conversation_id, "assistant", response, count_tokens(response))
 
-    # 9. Bump updated_at
+    # 9. Write usage log
+    _log_usage(db, conv, provider_used, user_message, response, response_time_ms)
+
+    # 10. Bump updated_at
     touch_conversation(db, conversation_id)
 
-    # 10. Auto-title on first turn
+    # 11. Auto-title on first turn
     if conv.title is None:
         first = get_last_user_message(db, conversation_id)
         if first and first.id == user_msg.id:
             update_conversation_title(db, conversation_id, _title(user_message))
 
-    logger.info(f"turn complete conv={conversation_id} provider={provider_used} fallback={was_fallback}")
+    logger.info(f"turn complete conv={conversation_id} provider={provider_used} fallback={was_fallback} time={response_time_ms}ms")
     return response, asst_msg.id, provider_used, was_fallback
