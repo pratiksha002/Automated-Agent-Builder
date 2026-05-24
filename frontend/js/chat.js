@@ -4,39 +4,39 @@ import { toast, confirmDialog, relativeTime, formatTime } from './ui.js';
 if (!sessionStorage.getItem('token')) window.location.href = '/index.html';
 
 // ── State ─────────────────────────────────────────────────────────────────
-let activeCid    = null;
-let isSending    = false;
-let allConvs     = [];
-const agentId    = sessionStorage.getItem('active_agent_id');
-const agentName  = sessionStorage.getItem('active_agent_name') || 'Agent';
+let activeCid = null;
+let isSending = false;
+let allConvs = [];
+const agentId = sessionStorage.getItem('active_agent_id');
+const agentName = sessionStorage.getItem('active_agent_name') || 'Agent';
 const agentModel = sessionStorage.getItem('active_agent_model') || '';
 
 // ── DOM ───────────────────────────────────────────────────────────────────
-const sidebarList   = document.getElementById('sidebar-list');
-const searchInput   = document.getElementById('sidebar-search');
-const msgWrap       = document.getElementById('messages');
-const chatInput     = document.getElementById('chat-input');
-const sendBtn       = document.getElementById('send-btn');
-const charCountEl   = document.getElementById('char-count');
-const welcomeEl     = document.getElementById('chat-welcome');
+const sidebarList = document.getElementById('sidebar-list');
+const searchInput = document.getElementById('sidebar-search');
+const msgWrap = document.getElementById('messages');
+const chatInput = document.getElementById('chat-input');
+const sendBtn = document.getElementById('send-btn');
+const charCountEl = document.getElementById('char-count');
+const welcomeEl = document.getElementById('chat-welcome');
 const chatContentEl = document.getElementById('chat-content');
-const newBtn        = document.getElementById('new-chat-btn');
-const headerName    = document.getElementById('chat-agent-name');
-const headerSub     = document.getElementById('chat-agent-sub');
-const startersEl    = document.getElementById('starters');
+const newBtn = document.getElementById('new-chat-btn');
+const headerName = document.getElementById('chat-agent-name');
+const headerSub = document.getElementById('chat-agent-sub');
+const startersEl = document.getElementById('starters');
 
 // Provider UI
-const providerBadge  = document.getElementById('provider-badge');
-const providerLabel  = document.getElementById('provider-label');
-const switchBtn      = document.getElementById('switch-provider-btn');
+const providerBadge = document.getElementById('provider-badge');
+const providerLabel = document.getElementById('provider-label');
+const switchBtn = document.getElementById('switch-provider-btn');
 const fallbackBanner = document.getElementById('fallback-banner');
-const fallbackClose  = document.getElementById('fallback-banner-close');
+const fallbackClose = document.getElementById('fallback-banner-close');
 
 let currentProvider = 'groq';
 
 // ── Init header ───────────────────────────────────────────────────────────
 if (headerName) headerName.textContent = agentName;
-if (headerSub)  headerSub.textContent  = agentModel;
+if (headerSub) headerSub.textContent = agentModel;
 
 document.getElementById('logout-btn')?.addEventListener('click', () => {
   sessionStorage.clear(); window.location.href = '/index.html';
@@ -158,11 +158,11 @@ ms.onload = () => { window.marked.setOptions({ breaks: true, gfm: true }); marke
 document.head.appendChild(ms);
 
 function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function renderMd(text) {
-  if (!markedReady || !window.marked) return escHtml(text).replace(/\n/g,'<br>');
+  if (!markedReady || !window.marked) return escHtml(text).replace(/\n/g, '<br>');
   let html = window.marked.parse(text);
   html = html.replace(
     /<pre><code(?: class="language-(\w+)")?>([\s\S]*?)<\/code><\/pre>/g,
@@ -300,7 +300,7 @@ async function loadConv(id) {
   msgWrap.innerHTML = '';
   document.querySelectorAll('.s-item').forEach(el =>
     el.classList.toggle('active', el.dataset.id === id));
-  if (welcomeEl)     welcomeEl.style.display     = 'none';
+  if (welcomeEl) welcomeEl.style.display = 'none';
   if (chatContentEl) chatContentEl.style.display = 'flex';
   if (fallbackBanner) fallbackBanner.classList.remove('show');
   try {
@@ -356,7 +356,7 @@ function renderSidebar(convs) {
         allConvs = allConvs.filter(x => x.id !== c.id);
         if (activeCid === c.id) {
           activeCid = null; msgWrap.innerHTML = '';
-          if (welcomeEl)     welcomeEl.style.display     = 'flex';
+          if (welcomeEl) welcomeEl.style.display = 'flex';
           if (chatContentEl) chatContentEl.style.display = 'none';
           if (fallbackBanner) fallbackBanner.classList.remove('show');
           updateProviderUI('groq');
@@ -399,7 +399,7 @@ newBtn?.addEventListener('click', async () => {
     const c = await api.conversations.create(agentId);
     activeCid = c.id;
     msgWrap.innerHTML = '';
-    if (welcomeEl)     welcomeEl.style.display     = 'flex';
+    if (welcomeEl) welcomeEl.style.display = 'flex';
     if (chatContentEl) chatContentEl.style.display = 'none';
     if (fallbackBanner) fallbackBanner.classList.remove('show');
     if (c.current_provider) updateProviderUI(c.current_provider);
@@ -425,7 +425,7 @@ async function sendMessage() {
   }
 
   isSending = true; sendBtn.disabled = true;
-  if (welcomeEl)     welcomeEl.style.display     = 'none';
+  if (welcomeEl) welcomeEl.style.display = 'none';
   if (chatContentEl) chatContentEl.style.display = 'flex';
   chatInput.value = ''; chatInput.style.height = 'auto';
   if (charCountEl) charCountEl.textContent = '0';
