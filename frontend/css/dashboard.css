@@ -1,0 +1,243 @@
+.app-layout {
+  display: grid; grid-template-rows: 60px 1fr; min-height: 100vh;
+}
+.main { padding: 48px 40px; max-width: 1140px; margin: 0 auto; width: 100%; }
+
+/* ─── Page header ─────────────────────────────────────────────────── */
+.page-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 52px; gap: 20px;
+}
+.page-header-left {}
+.page-eyebrow {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--violet-2); margin-bottom: 8px;
+}
+.page-title {
+  font-family: var(--font-display); font-size: clamp(26px, 3vw, 38px);
+  font-weight: 800; letter-spacing: -0.03em; line-height: 1.1;
+}
+.page-sub { font-size: 14px; color: var(--text-2); margin-top: 6px; }
+
+/* ─── Section ─────────────────────────────────────────────────────── */
+.section { margin-bottom: 56px; }
+.section-label {
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-3); font-family: var(--font-mono);
+  margin-bottom: 20px; display: flex; align-items: center; gap: 12px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+/* ─── Agent Grid ──────────────────────────────────────────────────── */
+.agent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+
+/* ─── Agent Card ──────────────────────────────────────────────────── */
+.agent-card {
+  background: var(--ink-2); border: 1px solid var(--line);
+  border-radius: var(--r-xl); padding: 24px;
+  display: flex; flex-direction: column;
+  transition: all var(--t-slow) var(--ease);
+  position: relative; overflow: hidden;
+}
+.agent-card::after {
+  content: '';
+  position: absolute; inset: 0; border-radius: var(--r-xl);
+  background: linear-gradient(135deg, rgba(124,109,240,0.06) 0%, transparent 60%);
+  opacity: 0; transition: opacity var(--t-slow) var(--ease);
+  pointer-events: none;
+}
+.agent-card:hover {
+  border-color: rgba(124,109,240,0.35);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.45);
+}
+.agent-card:hover::after { opacity: 1; }
+
+.agent-card-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; margin-bottom: 14px;
+}
+.agent-card-name {
+  font-family: var(--font-display); font-size: 16px; font-weight: 700;
+  letter-spacing: -0.02em; line-height: 1.2; flex: 1;
+}
+.agent-card-desc {
+  font-size: 13.5px; color: var(--text-2); line-height: 1.6;
+  flex: 1; margin-bottom: 20px; min-height: 44px;
+}
+.agent-card-footer {
+  padding-top: 16px; border-top: 1px solid var(--line); margin-top: auto;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.agent-card-meta {
+  font-size: 11.5px; color: var(--text-3); font-family: var(--font-mono);
+}
+.agent-card-actions {
+  display: flex; gap: 8px; align-items: center;
+}
+
+/* ─── Skeleton ────────────────────────────────────────────────────── */
+.skeleton-card { height: 180px; border-radius: var(--r-xl); }
+
+/* ─── Empty state ─────────────────────────────────────────────────── */
+.empty-state {
+  grid-column: 1/-1; display: flex; flex-direction: column;
+  align-items: center; text-align: center; padding: 60px 20px;
+  border: 1px dashed var(--line-hi); border-radius: var(--r-xl); gap: 12px;
+}
+.empty-state svg { width: 36px; height: 36px; stroke: var(--text-3); fill: none; stroke-width: 1.5; margin-bottom: 4px; }
+.empty-state-title { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--text-2); }
+.empty-state p { font-size: 13.5px; color: var(--text-3); }
+
+/* ─── 3-dot card menu ─────────────────────────────────────────────── */
+.card-menu-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.card-menu-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3.5px;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r);
+  border: 1px solid var(--line);
+  background: var(--ink-3);
+  cursor: pointer;
+  transition: all var(--t) var(--ease);
+  padding: 0;
+  flex-shrink: 0;
+}
+.card-menu-btn span {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text-3);
+  transition: background var(--t) var(--ease);
+  pointer-events: none;
+}
+.card-menu-btn:hover {
+  border-color: var(--violet);
+  background: rgba(124,109,240,0.08);
+}
+.card-menu-btn:hover span { background: var(--violet-2); }
+
+.card-dropdown {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 0;
+  min-width: 170px;
+  background: var(--ink-2);
+  border: 1px solid var(--line-hi);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  display: none;
+  z-index: 50;
+  animation: dropUp 150ms var(--ease);
+}
+.card-dropdown.open { display: block; }
+
+@keyframes dropUp {
+  from { opacity: 0; transform: translateY(6px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+.card-dropdown-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 13.5px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  color: var(--text-2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--t) var(--ease);
+}
+.card-dropdown-item:hover {
+  background: var(--ink-3);
+  color: var(--text);
+}
+.card-dropdown-item.danger {
+  color: var(--danger);
+}
+.card-dropdown-item.danger:hover {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ADMIN COMPATIBILITY ALIASES
+   Teammate's admin pages use .layout, .agent-card-header,
+   .agent-card-model etc. These map to our existing styles.
+═══════════════════════════════════════════════════════════════════ */
+
+/* Layout alias: .layout → .app-layout */
+.layout {
+  display: grid;
+  grid-template-rows: 60px 1fr;
+  min-height: 100vh;
+}
+
+/* Page header aliases */
+.page-title    { font-family: var(--font-display); font-size: 30px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); margin-bottom: 4px; }
+.page-subtitle { font-size: 14px; color: var(--text-3); font-family: var(--font-body); }
+
+/* Agent card structure aliases */
+.agent-card-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 10px;
+}
+.agent-card-model {
+  font-size: 11px; color: var(--text-3); font-family: var(--font-mono);
+}
+
+/* Navbar user alias */
+.navbar-user {
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-3);
+  padding: 4px 12px; border-radius: 99px; border: 1px solid var(--line);
+  background: var(--ink-2);
+}
+
+/* Tags aliases (flat versions teammate may use) */
+.tag-platform {
+  background: rgba(124,109,240,0.1); color: var(--violet-2);
+  border: 1px solid rgba(124,109,240,0.25); font-family: var(--font-mono);
+  font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 99px;
+}
+.tag-user {
+  background: var(--ink-3); color: var(--text-3);
+  border: 1px solid var(--line); font-family: var(--font-mono);
+  font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 99px;
+}
+
+/* Action button aliases for admin card buttons */
+.agent-card-actions button {
+  background: var(--ink-3); border: 1px solid var(--line);
+  color: var(--text-3); font-size: 12px; font-family: var(--font-body);
+  cursor: pointer; padding: 4px 10px; border-radius: var(--r-sm);
+  transition: all var(--t) var(--ease);
+}
+.agent-card-actions button:hover {
+  color: var(--text); border-color: var(--line-hi); background: var(--line);
+}
+.agent-card-actions .delete-btn:hover {
+  color: var(--danger); border-color: rgba(240,92,92,0.3); background: var(--danger-bg);
+}
+
+/* Empty state alias */
+.empty-state {
+  grid-column: 1 / -1; color: var(--text-3);
+  font-size: 13px; font-family: var(--font-mono); padding: 32px 0;
+}
