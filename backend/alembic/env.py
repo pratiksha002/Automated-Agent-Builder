@@ -38,6 +38,14 @@ from app.models import (  # noqa: F401
 
 # Alembic Config object — provides access to alembic.ini values.
 config = context.config
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+database_url = os.getenv("DATABASE_URL")
+
+config.set_main_option("sqlalchemy.url", database_url)
 
 # Override sqlalchemy.url from alembic.ini with our settings value.
 # This means DATABASE_URL only needs to be set in .env — not duplicated
