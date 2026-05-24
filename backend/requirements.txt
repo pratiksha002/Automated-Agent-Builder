@@ -12,4 +12,6 @@ python-dotenv
 pytest
 pytest-asyncio
 pydantic
-jose
+python-jose[cryptography]
+passlib
+pydantic[email]

@@ -27,18 +27,19 @@ BOLD   = "\033[1m"
  
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
  
-# ─── Single shared venv Python ────────────────────────────────────────────────
-# Points to the single env/ virtual environment at the project root.
-# On Windows: env\Scripts\python.exe
-# On Mac/Linux: env/bin/python
-if sys.platform == "win32":
-    VENV_PYTHON = os.path.join(PROJECT_ROOT, "..", "env", "Scripts", "python.exe")
+# Look strictly inside the Automated-Agent-Builder project root
+inner_env_win = os.path.join(PROJECT_ROOT, "env", "Scripts", "python.exe")
+inner_env_bash = os.path.join(PROJECT_ROOT, "env", "Scripts", "python")
+inner_env_mac = os.path.join(PROJECT_ROOT, "env", "bin", "python")
+
+if os.path.exists(inner_env_win):
+    VENV_PYTHON = inner_env_win
+elif os.path.exists(inner_env_bash):
+    VENV_PYTHON = inner_env_bash
+elif os.path.exists(inner_env_mac):
+    VENV_PYTHON = inner_env_mac
 else:
-    VENV_PYTHON = os.path.join(PROJECT_ROOT, "..", "env", "bin", "python")
- 
-# Fall back to current Python if venv not found
-if not os.path.exists(VENV_PYTHON):
-    print(f"{YELLOW}[warn] venv not found at {VENV_PYTHON}, using system Python{RESET}")
+    print(f"{YELLOW}[warn] venv not found, using system Python{RESET}")
     VENV_PYTHON = sys.executable
  
 SERVERS = [

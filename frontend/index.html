@@ -14,7 +14,7 @@
       z-index: 9999; transition: width 0.1s linear; border-radius: 0 2px 2px 0;
     }
 
-    /* ── Stat strip ───────────────────────────────────────────────── */
+    /* ── Stat strip ── */
     .stat-strip {
       display: grid; grid-template-columns: repeat(4,1fr);
       border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
@@ -31,6 +31,153 @@
       letter-spacing: -0.04em; color: var(--text); line-height: 1; margin-bottom: 6px;
     }
     .stat-label { font-size: 13px; color: var(--text-3); font-family: var(--font-mono); }
+
+    /* ── Provider pill ── */
+    .provider-pills {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; flex-wrap: wrap; margin-top: 20px;
+    }
+    .provider-pill {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 6px 14px; border-radius: 99px;
+      font-size: 12px; font-family: var(--font-mono); font-weight: 600;
+      letter-spacing: 0.04em; border: 1px solid;
+    }
+    .provider-pill-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .pill-groq {
+      color: var(--violet-2); border-color: rgba(124,109,240,0.3);
+      background: rgba(124,109,240,0.07);
+    }
+    .pill-groq .provider-pill-dot { background: var(--violet-2); }
+    .pill-ollama {
+      color: var(--success); border-color: rgba(74,222,128,0.3);
+      background: rgba(74,222,128,0.06);
+    }
+    .pill-ollama .provider-pill-dot { background: var(--success); }
+
+    /* ── Feedback loop section ── */
+    .feedback-section {
+      border-top: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%);
+    }
+    .feedback-inner {
+      max-width: 1160px; margin: 0 auto; padding: 100px 40px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+    }
+    @media(max-width:768px) {
+      .feedback-inner { grid-template-columns: 1fr; gap: 40px; padding: 64px 20px; }
+    }
+    .feedback-text .section-eyebrow { margin-bottom: 16px; }
+    .feedback-text h2 {
+      font-family: var(--font-display); font-size: clamp(28px,3.5vw,44px);
+      font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 18px;
+    }
+    .feedback-text p {
+      font-size: 15px; color: var(--text-2); line-height: 1.75; margin-bottom: 14px;
+    }
+    .feedback-steps { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; }
+    .feedback-step {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 16px 18px; background: var(--ink-3);
+      border: 1px solid var(--line); border-radius: var(--r-lg);
+      transition: all var(--t-slow) var(--ease);
+    }
+    .feedback-step:hover { border-color: rgba(124,109,240,0.3); background: var(--ink-2); }
+    .feedback-step-num {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(124,109,240,0.12); border: 1px solid rgba(124,109,240,0.25);
+      display: grid; place-items: center;
+      font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+      color: var(--violet-2);
+    }
+    .feedback-step-text { font-size: 13.5px; color: var(--text-2); line-height: 1.6; }
+    .feedback-step-text strong { color: var(--text); font-weight: 600; }
+
+    .feedback-visual {
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .fv-card {
+      background: var(--ink-3); border: 1px solid var(--line);
+      border-radius: var(--r-lg); padding: 16px 20px;
+      transition: all var(--t-slow) var(--ease);
+    }
+    .fv-card:hover { border-color: rgba(124,109,240,0.3); transform: translateX(4px); }
+    .fv-card-label {
+      font-size: 10px; font-family: var(--font-mono); font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .fv-card-label.up   { color: var(--success); }
+    .fv-card-label.down { color: var(--danger); }
+    .fv-card-label.fix  { color: var(--violet-2); }
+    .fv-msg { font-size: 13px; color: var(--text-2); line-height: 1.55; font-style: italic; }
+    .fv-suggestion {
+      margin-top: 10px; padding: 10px 14px;
+      background: rgba(124,109,240,0.06); border: 1px solid rgba(124,109,240,0.2);
+      border-radius: var(--r-sm); font-size: 12px; color: var(--text-2);
+      font-family: var(--font-mono); line-height: 1.6;
+    }
+    .fv-arrow {
+      text-align: center; color: var(--text-3); font-size: 18px;
+      font-family: var(--font-mono); padding: 2px 0;
+    }
+
+    /* ── Ollama section ── */
+    .ollama-section {
+      border-top: 1px solid var(--line);
+    }
+    .ollama-inner {
+      max-width: 1160px; margin: 0 auto; padding: 100px 40px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+    }
+    @media(max-width:768px) {
+      .ollama-inner { grid-template-columns: 1fr; gap: 40px; padding: 64px 20px; }
+    }
+    .ollama-text .section-eyebrow { margin-bottom: 16px; }
+    .ollama-text h2 {
+      font-family: var(--font-display); font-size: clamp(28px,3.5vw,44px);
+      font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 18px;
+    }
+    .ollama-text p { font-size: 15px; color: var(--text-2); line-height: 1.75; margin-bottom: 14px; }
+    .ollama-features { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+    .ollama-feat {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 14px; color: var(--text-2);
+    }
+    .ollama-feat-icon {
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.25);
+      display: grid; place-items: center;
+    }
+    .ollama-feat-icon svg { width: 11px; height: 11px; stroke: var(--success); fill: none; stroke-width: 2.5; }
+    .ollama-visual {
+      background: var(--ink-2); border: 1px solid var(--line);
+      border-radius: var(--r-xl); padding: 28px; display: flex; flex-direction: column; gap: 0;
+    }
+    .ov-header {
+      display: flex; align-items: center; gap: 10px; padding-bottom: 16px;
+      border-bottom: 1px solid var(--line); margin-bottom: 16px;
+    }
+    .ov-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .ov-title { font-size: 12px; font-family: var(--font-mono); color: var(--text-2); font-weight: 600; }
+    .ov-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px;
+    }
+    .ov-row:last-child { border-bottom: none; }
+    .ov-model { color: var(--text); font-weight: 500; }
+    .ov-provider {
+      font-size: 10.5px; font-family: var(--font-mono); font-weight: 700;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 99px; border: 1px solid;
+    }
+    .ov-provider.groq   { color: var(--violet-2); border-color: rgba(124,109,240,0.3); background: rgba(124,109,240,0.07); }
+    .ov-provider.ollama { color: var(--success);  border-color: rgba(74,222,128,0.3);  background: rgba(74,222,128,0.07); }
+    .ov-switch {
+      margin-top: 16px; padding: 12px 16px;
+      background: rgba(74,222,128,0.06); border: 1px solid rgba(74,222,128,0.2);
+      border-radius: var(--r); font-size: 12.5px; color: var(--success);
+      font-family: var(--font-mono); line-height: 1.55;
+    }
 
     @media (max-width: 768px) {
       .stat-strip { grid-template-columns: 1fr 1fr; }
@@ -71,14 +218,14 @@
   <div class="hero-content">
     <div class="hero-badge" data-fade>
       <span class="hero-badge-dot"></span>
-      Powered by Groq · Sub-second inference
+      Groq cloud · Ollama local · Zero rate limit worries
     </div>
     <h1 class="hero-title" data-fade data-delay="1">
       Build intelligent<br><em class="grad-text">AI agents</em><br>that actually work
     </h1>
     <p class="hero-sub" data-fade data-delay="2">
-      Create, configure, and deploy custom AI agents backed by the world's fastest LLMs.
-      No code, no infrastructure — just results.
+      Create, configure, and deploy custom AI agents backed by Groq and Ollama.
+      Agents that learn from feedback, never lose context, and never get stuck on rate limits.
     </p>
     <div class="hero-actions" data-fade data-delay="3">
       <a href="login.html#register" class="btn btn-primary btn-lg">
@@ -91,17 +238,28 @@
       </a>
       <a href="#how" class="btn btn-outline btn-lg">See how it works</a>
     </div>
+    <div class="provider-pills" data-fade data-delay="4">
+      <div class="provider-pill pill-groq">
+        <span class="provider-pill-dot"></span> Groq Cloud
+      </div>
+      <div class="provider-pill pill-ollama">
+        <span class="provider-pill-dot"></span> Ollama Local
+      </div>
+      <span style="font-size:12px;color:var(--text-3);font-family:var(--font-mono)">
+        · Auto-fallback · Full context sharing
+      </span>
+    </div>
   </div>
 </section>
 
 <!-- ── STATS ── -->
 <div class="stat-strip">
   <div class="stat-item" data-fade>
-    <div class="stat-num"><span data-count="4">0</span></div>
-    <div class="stat-label">LLM Models</div>
+    <div class="stat-num"><span data-count="8">0</span></div>
+    <div class="stat-label">LLM Models (Groq + Ollama)</div>
   </div>
   <div class="stat-item" data-fade data-delay="1">
-    <div class="stat-num">&lt;<span data-count="1">0</span>s</div>
+    <div class="stat-num">~<span data-count="15">0</span>s</div>
     <div class="stat-label">Avg. response time</div>
   </div>
   <div class="stat-item" data-fade data-delay="2">
@@ -120,7 +278,7 @@
     <div class="section-header" data-fade>
       <div class="section-eyebrow">Platform features</div>
       <h2 class="section-title">Everything built in. Nothing bolted on.</h2>
-      <p class="section-sub">A complete agent platform — from creation to conversation, built for real-world use.</p>
+      <p class="section-sub">A complete agent platform — from creation to conversation, with self-improvement built into every response.</p>
     </div>
     <div class="features-grid stagger-children">
       <div class="feature-card tilt-card">
@@ -133,25 +291,30 @@
       </div>
       <div class="feature-card tilt-card">
         <div class="feature-icon">
-          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <svg viewBox="0 0 24 24">
+            <ellipse cx="12" cy="12" rx="9" ry="5"/>
+            <path d="M3 12c0 3 4 5.5 9 5.5s9-2.5 9-5.5"/>
+            <line x1="12" y1="7" x2="12" y2="17"/>
+          </svg>
         </div>
-        <div class="feature-title">Sub-second Inference</div>
-        <p class="feature-desc">Powered by Groq's dedicated LPU inference hardware. LLaMA 3.3 70B, Mixtral 8×7B, and Gemma 2 — all delivering responses faster than you can read.</p>
+        <div class="feature-title">Groq + Ollama Dual Backend</div>
+        <p class="feature-desc">Run agents on Groq's cloud for speed or Ollama locally for privacy and no rate limits. Switch providers per conversation — context is always fully preserved.</p>
       </div>
       <div class="feature-card tilt-card">
         <div class="feature-icon">
           <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         </div>
         <div class="feature-title">Persistent Memory</div>
-        <p class="feature-desc">Every conversation is stored with complete context. Search history, resume threads, and let agents remember exactly where you left off.</p>
+        <p class="feature-desc">Every conversation is stored with complete context. Search history, resume threads, and let agents remember exactly where you left off — across both Groq and Ollama.</p>
       </div>
       <div class="feature-card tilt-card">
         <div class="feature-icon">
-          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/>
-            <path d="M3 9h18M9 21V9"/></svg>
+          <svg viewBox="0 0 24 24">
+            <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
         </div>
-        <div class="feature-title">Multi-model Selection</div>
-        <p class="feature-desc">Match the model to the task. Use the 70B for complex reasoning, the 8B instant for rapid iteration. Switch per agent, not per conversation.</p>
+        <div class="feature-title">Feedback-Driven Improvement</div>
+        <p class="feature-desc">Rate any response thumbs up or down. The platform analyses poor responses and generates targeted improvements to the agent's system prompt — automatically.</p>
       </div>
       <div class="feature-card tilt-card">
         <div class="feature-icon">
@@ -172,13 +335,142 @@
   </div>
 </div>
 
+<!-- ── OLLAMA SECTION ── -->
+<div class="ollama-section">
+  <div class="ollama-inner">
+    <div class="ollama-text" data-fade>
+      <div class="section-eyebrow">Local inference</div>
+      <h2>No rate limits. <span class="grad-text">Full privacy.</span></h2>
+      <p>
+        Agentive connects to your local Ollama installation alongside Groq cloud. If Groq hits a rate limit, the platform automatically falls back to Ollama — mid-conversation, without losing a single message.
+      </p>
+      <p>
+        Or choose Ollama from the start when you need complete data privacy. Your conversations never leave your machine.
+      </p>
+      <div class="ollama-features">
+        <div class="ollama-feat">
+          <div class="ollama-feat-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Automatic Groq → Ollama fallback on rate limit
+        </div>
+        <div class="ollama-feat">
+          <div class="ollama-feat-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Full conversation history shared across providers
+        </div>
+        <div class="ollama-feat">
+          <div class="ollama-feat-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Manual switch button in every chat session
+        </div>
+        <div class="ollama-feat">
+          <div class="ollama-feat-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          Supports LLaMA 3.2, Mistral, Phi-3, and more
+        </div>
+      </div>
+    </div>
+    <div class="ollama-visual" data-fade data-delay="2">
+      <div class="ov-header">
+        <div class="ov-dot" style="background:var(--success)"></div>
+        <div class="ov-title">Available models</div>
+      </div>
+      <div class="ov-row">
+        <span class="ov-model">LLaMA 3.3 70B</span>
+        <span class="ov-provider groq">Groq</span>
+      </div>
+      <div class="ov-row">
+        <span class="ov-model">LLaMA 3.1 8B</span>
+        <span class="ov-provider groq">Groq</span>
+      </div>
+      <div class="ov-row">
+        <span class="ov-model">Mixtral 8×7B</span>
+        <span class="ov-provider groq">Groq</span>
+      </div>
+      <div class="ov-row">
+        <span class="ov-model">Gemma 2 9B</span>
+        <span class="ov-provider groq">Groq</span>
+      </div>
+      <div class="ov-row">
+        <span class="ov-model">LLaMA 3.2 (Local)</span>
+        <span class="ov-provider ollama">Ollama</span>
+      </div>
+      <div class="ov-row">
+        <span class="ov-model">Mistral 7B (Local)</span>
+        <span class="ov-provider ollama">Ollama</span>
+      </div>
+      <div class="ov-row">
+        <span class="ov-model">LLaMA 3.1 8B (Local)</span>
+        <span class="ov-provider ollama">Ollama</span>
+      </div>
+      <div class="ov-row">
+        <span class="ov-model">Phi-3 Mini (Local)</span>
+        <span class="ov-provider ollama">Ollama</span>
+      </div>
+      <div class="ov-switch">
+        ⚡ Groq rate limit reached — automatically switched to<br>
+        <strong>Ollama (local)</strong>. Full context preserved.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FEEDBACK LOOP SECTION ── -->
+<div class="feedback-section">
+  <div class="feedback-inner">
+    <div class="feedback-visual" data-fade>
+      <div class="fv-card">
+        <div class="fv-card-label up">👍 Thumbs up</div>
+        <div class="fv-msg">"That explanation was exactly what I needed. Clear and concise."</div>
+      </div>
+      <div class="fv-arrow">↓</div>
+      <div class="fv-card">
+        <div class="fv-card-label down">👎 Thumbs down</div>
+        <div class="fv-msg">"The answer was too vague and didn't address my specific question about error handling."</div>
+      </div>
+      <div class="fv-arrow">↓</div>
+      <div class="fv-card">
+        <div class="fv-card-label fix">AI-generated prompt fix</div>
+        <div class="fv-suggestion">
+          Always address the user's specific question directly before giving general context. When the question involves error handling, provide a concrete code example with the exact error type named.
+        </div>
+      </div>
+      <div class="fv-arrow">↓</div>
+      <div class="fv-card" style="border-color:rgba(74,222,128,0.3);background:rgba(74,222,128,0.04)">
+        <div class="fv-card-label up" style="color:var(--success)">✓ Applied to agent prompt</div>
+        <div class="fv-msg" style="color:var(--text-2)">Agent now gives specific, targeted answers. Next response rated positive.</div>
+      </div>
+    </div>
+    <div class="feedback-text" data-fade data-delay="2">
+      <div class="section-eyebrow">Self-improving agents</div>
+      <h2>Agents that get <span class="grad-text">better</span> with every conversation</h2>
+      <p>
+        Every response can be rated thumbs up or down directly in the chat. Thumbs-down responses are analysed by the agent's own LLM, which generates a concrete fix to the system prompt.
+      </p>
+      <p>
+        You review the suggestion, edit if needed, and apply it with one click. The updated prompt takes effect immediately — on both Groq and Ollama.
+      </p>
+      <div class="feedback-steps">
+        <div class="feedback-step">
+          <div class="feedback-step-num">1</div>
+          <div class="feedback-step-text"><strong>Rate any response</strong> — thumbs up or down appears on hover on every assistant message</div>
+        </div>
+        <div class="feedback-step">
+          <div class="feedback-step-num">2</div>
+          <div class="feedback-step-text"><strong>Generate suggestions</strong> — the agent's LLM analyses what went wrong and proposes a targeted prompt fix</div>
+        </div>
+        <div class="feedback-step">
+          <div class="feedback-step-num">3</div>
+          <div class="feedback-step-text"><strong>Apply with one click</strong> — updates the system prompt instantly across all future conversations on both providers</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── HOW IT WORKS ── -->
 <div id="how" class="landing-section-full">
   <div class="landing-section">
     <div class="section-header" data-fade>
       <div class="section-eyebrow">How it works</div>
       <h2 class="section-title">From zero to deployed in four steps</h2>
-      <p class="section-sub">No DevOps, no model training, no infrastructure management. Just agents that work.</p>
+      <p class="section-sub">No DevOps, no model training, no infrastructure management. Just agents that work — and keep improving.</p>
     </div>
     <div class="how-grid stagger-children">
       <div class="how-step">
@@ -189,17 +481,17 @@
       <div class="how-step">
         <div class="how-num">02</div>
         <h3 class="how-title">Configure your agent</h3>
-        <p class="how-desc">Write a system prompt that defines your agent's role, tone, and expertise. Pick a model and enable any tools you need.</p>
+        <p class="how-desc">Write a system prompt, pick a Groq or Ollama model, and optionally enable tools. Start chatting in under two minutes.</p>
       </div>
       <div class="how-step">
         <div class="how-num">03</div>
-        <h3 class="how-title">Start a conversation</h3>
-        <p class="how-desc">Open a persistent chat session. Context accumulates across turns — the agent remembers everything in the thread.</p>
+        <h3 class="how-title">Chat across providers</h3>
+        <p class="how-desc">Open a persistent session. Switch between Groq and Ollama at any time — your full conversation history follows automatically.</p>
       </div>
       <div class="how-step">
         <div class="how-num">04</div>
-        <h3 class="how-title">Iterate and scale</h3>
-        <p class="how-desc">Refine prompts based on results. Build a fleet of specialised agents for every team, workflow, and use case.</p>
+        <h3 class="how-title">Rate, improve, repeat</h3>
+        <p class="how-desc">Rate responses and let the platform generate targeted prompt improvements. Your agents get measurably better with every conversation cycle.</p>
       </div>
     </div>
   </div>
@@ -217,32 +509,32 @@
       <div class="use-card tilt-card">
         <div class="use-card-label">Customer Support</div>
         <div class="use-card-title">24/7 Support Agent</div>
-        <p class="use-card-desc">Deploy an agent trained on your docs to handle queries continuously, with consistent tone and accurate answers — without human escalation.</p>
+        <p class="use-card-desc">Deploy an agent trained on your docs to handle queries continuously. Feedback loop ensures it improves with every poorly-rated response.</p>
       </div>
       <div class="use-card tilt-card">
         <div class="use-card-label">Engineering</div>
         <div class="use-card-title">Code Review Assistant</div>
-        <p class="use-card-desc">Get instant analysis, bug identification, refactoring suggestions, and explanations across any language or framework, on demand.</p>
+        <p class="use-card-desc">Get instant analysis, bug identification, and refactoring suggestions. Run locally via Ollama to keep proprietary code entirely on your machine.</p>
       </div>
       <div class="use-card tilt-card">
         <div class="use-card-label">Content &amp; Marketing</div>
         <div class="use-card-title">Brand Voice Writer</div>
-        <p class="use-card-desc">Encode your style guidelines into a prompt and generate on-brand copy for emails, ads, social posts, and product descriptions at scale.</p>
+        <p class="use-card-desc">Encode your style guidelines into a prompt and generate on-brand copy at scale. Rate outputs to continuously refine the agent's tone.</p>
       </div>
       <div class="use-card tilt-card">
         <div class="use-card-label">Research</div>
         <div class="use-card-title">Research Summarizer</div>
-        <p class="use-card-desc">Paste papers, reports, and documents and get structured summaries with key findings, methodology critiques, and follow-up questions extracted.</p>
+        <p class="use-card-desc">Paste papers and documents and get structured summaries. Use Ollama for sensitive research that can't leave your environment.</p>
       </div>
       <div class="use-card tilt-card">
         <div class="use-card-label">Education</div>
         <div class="use-card-title">Personal Tutor</div>
-        <p class="use-card-desc">Build subject-specific tutors that teach at each student's pace, answer detailed questions, and generate custom practice exercises instantly.</p>
+        <p class="use-card-desc">Build subject-specific tutors that teach at each student's pace. Feedback from students directly improves the tutor's explanations over time.</p>
       </div>
       <div class="use-card tilt-card">
         <div class="use-card-label">Operations</div>
         <div class="use-card-title">Internal Knowledge Base</div>
-        <p class="use-card-desc">Give your team an agent that knows your processes, onboarding docs, and policies — replacing long Notion hunts with a single question.</p>
+        <p class="use-card-desc">Give your team an agent that knows your processes and policies. Run it on Ollama to keep internal data completely private.</p>
       </div>
     </div>
   </div>
@@ -273,7 +565,7 @@
   <div class="footer">
     <div class="footer-brand">
       <span class="navbar-logo" style="display:block;margin-bottom:12px">Agent<span>ive</span></span>
-      <p>Build, deploy, and manage intelligent AI agents — powered by the world's fastest inference infrastructure.</p>
+      <p>Build, deploy, and manage intelligent AI agents — powered by Groq cloud and Ollama local inference.</p>
       <p style="margin-top:10px;font-size:12px;color:var(--text-3);font-family:var(--font-mono)">
         By DevNexus · devnexus26@gmail.com
       </p>
@@ -301,7 +593,7 @@
       <span style="color:var(--line-hi)">·</span>
       <span>PostgreSQL</span>
       <span style="color:var(--line-hi)">·</span>
-      <span>Groq</span>
+      <span>Groq + Ollama</span>
     </span>
   </div>
 </footer>
