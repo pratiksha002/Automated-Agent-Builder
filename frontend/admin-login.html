@@ -1,70 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Login — Agent Builder</title>
-  <link rel="stylesheet" href="css/global.css" />
-  <link rel="stylesheet" href="css/auth.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — Agentive</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <link rel="stylesheet" href="css/admin.css"/>
 </head>
 <body>
-  <div class="auth-page">
-    <div class="auth-card">
-      <div class="auth-logo">Agent<span>Builder</span> <span style="color:var(--danger);margin-left:8px;">ADMIN</span></div>
+<div class="admin-login-page">
+  <div class="admin-login-card">
 
-      <div>
-        <h1 class="auth-title">Admin access.</h1>
-        <p class="auth-subtitle">Restricted to platform administrators only.</p>
-
-        <form class="auth-form" onsubmit="return false;" id="admin-login-form">
-          <div class="form-group">
-            <label for="admin-email">Email</label>
-            <input id="admin-email" type="email" placeholder="admin@agentbuilder.com" required />
-          </div>
-          <div class="form-group">
-            <label for="admin-password">Password</label>
-            <input id="admin-password" type="password" placeholder="••••••••" required />
-          </div>
-          <p class="error-msg" id="admin-login-error"></p>
-          <button type="submit" class="btn btn-primary">Sign in as Admin</button>
-        </form>
-      </div>
+    <div class="admin-logo">
+      <div class="navbar-logo" style="margin:0">Agent<span>ive</span></div>
+      <span class="admin-logo-badge">Admin</span>
     </div>
+
+    <h1 class="admin-login-title">Admin access.</h1>
+    <p class="admin-login-sub">Restricted to platform administrators only.</p>
+
+    <form class="admin-form" id="admin-form" onsubmit="return false">
+      <div class="form-group">
+        <label for="admin-email">Email</label>
+        <input id="admin-email" type="email"
+          placeholder="admin@agentive.com" autocomplete="email" required/>
+      </div>
+      <div class="form-group">
+        <label for="admin-password">Password</label>
+        <input id="admin-password" type="password"
+          placeholder="••••••••" required/>
+      </div>
+      <p class="error-msg" id="admin-error"></p>
+      <button type="submit" class="btn btn-primary">Sign in as Admin</button>
+    </form>
+
+    <p style="margin-top:20px;font-size:12px;color:var(--text-3);font-family:var(--font-mono);text-align:center">
+      <a href="index.html" style="color:var(--text-3)">← Back to home</a>
+    </p>
   </div>
+</div>
 
-  <script type="module">
-    if (sessionStorage.getItem('admin_token')) {
-      window.location.href = '/admin.html';
+<script type="module">
+  const BASE = 'http://localhost:8001';
+
+  document.getElementById('admin-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const errEl = document.getElementById('admin-error');
+    const btn   = e.target.querySelector('button[type=submit]');
+    errEl.textContent = '';
+    btn.disabled = true; btn.textContent = 'Signing in…';
+
+    const email    = document.getElementById('admin-email').value.trim();
+    const password = document.getElementById('admin-password').value;
+
+    try {
+      const res = await fetch(`${BASE}/api/v1/admin/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Invalid credentials');
+
+      sessionStorage.setItem('admin_token', data.access_token);
+      window.location.href = '/admin-dashboard.html';
+    } catch (err) {
+      errEl.textContent = err.message;
+      btn.disabled = false; btn.textContent = 'Sign in as Admin';
     }
-
-    const form  = document.getElementById('admin-login-form');
-    const error = document.getElementById('admin-login-error');
-
-    form.addEventListener('submit', async () => {
-      error.textContent = '';
-      const email    = document.getElementById('admin-email').value.trim();
-      const password = document.getElementById('admin-password').value;
-      const btn      = form.querySelector('button[type=submit]');
-
-      btn.disabled = true;
-      btn.textContent = 'Signing in...';
-
-      try {
-        const res = await fetch('http://localhost:8001/api/v1/admin/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || 'Login failed');
-        sessionStorage.setItem('admin_token', data.access_token);
-        window.location.href = '/admin.html';
-      } catch (err) {
-        error.textContent = err.message;
-        btn.disabled = false;
-        btn.textContent = 'Sign in as Admin';
-      }
-    });
-  </script>
+  });
+</script>
 </body>
 </html>

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile — Agentive</title>
+  <link rel="stylesheet" href="css/global.css"/>
+  <link rel="stylesheet" href="css/dashboard.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
+  <style>
+    /* ── Profile layout ── */
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+    @media(max-width:800px) { .profile-grid { grid-template-columns: 1fr; } }
+
+    /* ── Profile card (left) ── */
+    .profile-card {
+      background: var(--ink-2); border: 1px solid var(--line);
+      border-radius: var(--r-xl); padding: 28px; position: sticky; top: 80px;
+    }
+    .profile-avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--violet), var(--violet-2));
+      display: grid; place-items: center;
+      font-family: var(--font-display); font-size: 26px; font-weight: 800;
+      color: #fff; margin: 0 auto 16px;
+    }
+    .profile-name {
+      font-family: var(--font-display); font-size: 18px; font-weight: 700;
+      letter-spacing: -0.02em; text-align: center; margin-bottom: 4px;
+    }
+    .profile-email {
+      font-size: 12.5px; color: var(--text-3); font-family: var(--font-mono);
+      text-align: center; margin-bottom: 20px;
+    }
+    .profile-since {
+      font-size: 11.5px; color: var(--text-3); font-family: var(--font-mono);
+      text-align: center; padding: 10px 0;
+      border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+      margin-bottom: 20px;
+    }
+    .profile-nav { display: flex; flex-direction: column; gap: 4px; }
+    .profile-nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: var(--r); font-size: 13.5px;
+      color: var(--text-2); cursor: pointer; font-weight: 500;
+      transition: all var(--t) var(--ease); border: 1px solid transparent;
+      background: none;
+    }
+    .profile-nav-item:hover { background: var(--ink-3); color: var(--text); }
+    .profile-nav-item.active {
+      background: rgba(124,109,240,0.08);
+      border-color: rgba(124,109,240,0.2);
+      color: var(--violet-2);
+    }
+    .profile-nav-item svg {
+      width: 15px; height: 15px; stroke: currentColor;
+      fill: none; stroke-width: 2; flex-shrink: 0;
+    }
+
+    /* ── Right content ── */
+    .profile-section { display: none; }
+    .profile-section.active { display: block; }
+
+    /* ── Stat cards ── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+      gap: 12px; margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--ink-2); border: 1px solid var(--line);
+      border-radius: var(--r-lg); padding: 18px 20px;
+      transition: all var(--t-slow) var(--ease);
+    }
+    .stat-card:hover { border-color: rgba(124,109,240,0.3); transform: translateY(-2px); }
+    .stat-card-num {
+      font-family: var(--font-display); font-size: 30px; font-weight: 800;
+      letter-spacing: -0.04em; line-height: 1; margin-bottom: 5px;
+    }
+    .stat-card-label {
+      font-size: 11.5px; color: var(--text-3); font-family: var(--font-mono);
+    }
+
+    /* ── Provider bar chart ── */
+    .provider-chart { margin-bottom: 28px; }
+    .provider-chart-title {
+      font-family: var(--font-display); font-size: 15px; font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .provider-bars { display: flex; flex-direction: column; gap: 12px; }
+    .provider-bar-row { display: flex; flex-direction: column; gap: 6px; }
+    .provider-bar-label {
+      display: flex; justify-content: space-between;
+      font-size: 13px; color: var(--text-2); font-family: var(--font-mono);
+    }
+    .provider-bar-track {
+      height: 8px; background: var(--ink-3); border-radius: 99px;
+      overflow: hidden;
+    }
+    .provider-bar-fill {
+      height: 100%; border-radius: 99px;
+      transition: width 1s cubic-bezier(0.16,1,0.3,1);
+    }
+    .bar-groq   { background: linear-gradient(90deg, var(--violet), var(--violet-2)); }
+    .bar-ollama { background: linear-gradient(90deg, #22c55e, var(--success)); }
+
+    /* ── Feedback donut ── */
+    .feedback-ring-wrap {
+      display: flex; align-items: center; gap: 28px;
+      background: var(--ink-2); border: 1px solid var(--line);
+      border-radius: var(--r-xl); padding: 24px; margin-bottom: 28px;
+    }
+    .ring-svg { flex-shrink: 0; }
+    .ring-legend { display: flex; flex-direction: column; gap: 10px; }
+    .ring-legend-item {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13.5px; color: var(--text-2);
+    }
+    .ring-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .ring-val { font-weight: 700; color: var(--text); margin-left: auto; font-family: var(--font-mono); }
+
+    /* ── Agents list ── */
+    .agents-list { display: flex; flex-direction: column; gap: 10px; }
+    .agent-row {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--ink-2); border: 1px solid var(--line);
+      border-radius: var(--r-lg); padding: 14px 18px;
+      transition: border-color var(--t-slow) var(--ease);
+    }
+    .agent-row:hover { border-color: rgba(124,109,240,0.3); }
+    .agent-row-name { font-weight: 600; font-size: 14px; flex: 1; }
+    .agent-row-meta {
+      font-size: 11.5px; color: var(--text-3); font-family: var(--font-mono);
+    }
+
+    /* ── Section header ── */
+    .section-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .section-head h2 {
+      font-family: var(--font-display); font-size: 20px;
+      font-weight: 700; letter-spacing: -0.02em;
+    }
+
+    /* ── Danger zone ── */
+    .danger-zone {
+      background: var(--danger-bg); border: 1px solid rgba(240,92,92,0.3);
+      border-radius: var(--r-xl); padding: 28px; margin-top: 12px;
+    }
+    .danger-zone h3 {
+      font-family: var(--font-display); font-size: 17px; font-weight: 700;
+      color: var(--danger); margin-bottom: 8px;
+    }
+    .danger-zone p {
+      font-size: 13.5px; color: var(--text-2); line-height: 1.6; margin-bottom: 20px;
+    }
+
+    /* ── Activity timeline ── */
+    .timeline { display: flex; flex-direction: column; gap: 0; }
+    .timeline-item {
+      display: flex; gap: 16px; padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .timeline-item:last-child { border-bottom: none; }
+    .timeline-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--violet); flex-shrink: 0; margin-top: 6px;
+    }
+    .timeline-body { flex: 1; }
+    .timeline-text { font-size: 13.5px; color: var(--text-2); line-height: 1.5; }
+    .timeline-time { font-size: 11px; color: var(--text-3); font-family: var(--font-mono); margin-top: 3px; }
+
+    /* ── Loading skeleton ── */
+    .skeleton-line { height: 16px; border-radius: var(--r-sm); margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <nav class="navbar">
+    <div class="navbar-logo">Agent<span>ive</span></div>
+    <div class="navbar-right">
+      <button class="btn btn-ghost btn-sm"
+        onclick="window.location.href='dashboard.html'">← Dashboard</button>
+      <button class="btn btn-ghost btn-sm" id="logout-btn">Sign out</button>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="page-header" data-fade>
+      <div class="page-header-left">
+        <div class="page-eyebrow">Account</div>
+        <h1 class="page-title">My Profile</h1>
+        <p class="page-sub">Usage analytics, agent management, and account settings.</p>
+      </div>
+    </div>
+
+    <div class="profile-grid" data-fade data-delay="1">
+
+      <!-- ── Left sidebar ── -->
+      <div class="profile-card">
+        <div class="profile-avatar" id="avatar-initials">?</div>
+        <div class="profile-name" id="profile-name">Loading…</div>
+        <div class="profile-email" id="profile-email"></div>
+        <div class="profile-since" id="profile-since">Member since —</div>
+
+        <nav class="profile-nav">
+          <button class="profile-nav-item active" data-section="overview">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Overview
+          </button>
+          <button class="profile-nav-item" data-section="providers">
+            <svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="9" ry="5"/><path d="M3 12c0 3 4 5.5 9 5.5s9-2.5 9-5.5"/><line x1="12" y1="7" x2="12" y2="17"/></svg>
+            Providers
+          </button>
+          <button class="profile-nav-item" data-section="feedback-stats">
+            <svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+            Feedback
+          </button>
+          <button class="profile-nav-item" data-section="my-agents">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>
+            My Agents
+          </button>
+          <button class="profile-nav-item" data-section="activity">
+            <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Activity
+          </button>
+          <button class="profile-nav-item" data-section="settings" style="margin-top:8px;border-top:1px solid var(--line);padding-top:12px">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 0-14.14 0M4.93 19.07a10 10 0 0 0 14.14 0"/></svg>
+            Settings
+          </button>
+        </nav>
+      </div>
+
+      <!-- ── Right content ── -->
+      <div class="profile-content">
+
+        <!-- Overview -->
+        <div class="profile-section active" id="sec-overview">
+          <div class="section-head">
+            <h2>Overview</h2>
+          </div>
+          <div class="stats-grid" id="overview-stats">
+            <div class="stat-card skeleton" style="height:90px"></div>
+            <div class="stat-card skeleton" style="height:90px"></div>
+            <div class="stat-card skeleton" style="height:90px"></div>
+            <div class="stat-card skeleton" style="height:90px"></div>
+          </div>
+
+          <div class="section-head" style="margin-top:8px">
+            <h2>Most used provider</h2>
+          </div>
+          <div class="provider-chart">
+            <div class="provider-bars" id="provider-mini-bars">
+              <div class="skeleton" style="height:44px;border-radius:var(--r)"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Providers -->
+        <div class="profile-section" id="sec-providers">
+          <div class="section-head"><h2>Provider usage</h2></div>
+          <div id="provider-detail">
+            <div class="skeleton" style="height:200px;border-radius:var(--r-xl)"></div>
+          </div>
+        </div>
+
+        <!-- Feedback -->
+        <div class="profile-section" id="sec-feedback-stats">
+          <div class="section-head"><h2>Feedback &amp; improvements</h2></div>
+          <div id="feedback-detail">
+            <div class="skeleton" style="height:200px;border-radius:var(--r-xl)"></div>
+          </div>
+        </div>
+
+        <!-- Agents -->
+        <div class="profile-section" id="sec-my-agents">
+          <div class="section-head">
+            <h2>My Agents</h2>
+            <button class="btn btn-primary btn-sm"
+              onclick="window.location.href='create-agent.html'">+ New Agent</button>
+          </div>
+          <div class="agents-list" id="agents-list">
+            <div class="skeleton" style="height:56px;border-radius:var(--r-lg)"></div>
+            <div class="skeleton" style="height:56px;border-radius:var(--r-lg)"></div>
+          </div>
+        </div>
+
+        <!-- Activity -->
+        <div class="profile-section" id="sec-activity">
+          <div class="section-head"><h2>Recent activity</h2></div>
+          <div class="timeline" id="activity-list">
+            <div class="skeleton skeleton-line"></div>
+            <div class="skeleton skeleton-line"></div>
+            <div class="skeleton skeleton-line"></div>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="profile-section" id="sec-settings">
+          <div class="section-head"><h2>Account settings</h2></div>
+
+          <!-- Account info -->
+          <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:var(--r-xl);padding:24px;margin-bottom:20px">
+            <h3 style="font-family:var(--font-display);font-size:15px;font-weight:700;margin-bottom:18px">Account information</h3>
+            <div class="form-group" style="margin-bottom:14px">
+              <label>Full name</label>
+              <input type="text" id="settings-name" placeholder="Your name"/>
+            </div>
+            <div class="form-group" style="margin-bottom:18px">
+              <label>Email address</label>
+              <input type="email" id="settings-email" placeholder="you@example.com" disabled
+                style="opacity:0.5;cursor:not-allowed"/>
+              <small>Email cannot be changed. Contact support if needed.</small>
+            </div>
+            <button class="btn btn-outline btn-sm" id="save-name-btn">Save changes</button>
+          </div>
+
+          <!-- Danger zone -->
+          <div class="danger-zone">
+            <h3>Danger zone</h3>
+            <p>
+              Permanently deactivate your account. Your agents, conversations, and messages
+              will be preserved for audit purposes but you will no longer be able to sign in.
+              This action cannot be undone.
+            </p>
+            <button class="btn btn-sm" id="delete-account-btn"
+              style="background:var(--danger);color:#fff;border:1px solid var(--danger)">
+              Deactivate account
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import { api } from './js/api.js';
+import { toast, confirmDialog } from './js/ui.js';
+
+if (!sessionStorage.getItem('token')) window.location.href = '/index.html';
+
+document.getElementById('logout-btn')?.addEventListener('click', () => {
+  sessionStorage.clear(); window.location.href = '/index.html';
+});
+
+// ── Nav switching ──────────────────────────────────────────────────
+document.querySelectorAll('.profile-nav-item').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.profile-nav-item').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.profile-section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('sec-' + btn.dataset.section)?.classList.add('active');
+  });
+});
+
+// ── Load stats ─────────────────────────────────────────────────────
+let stats = null;
+
+async function loadStats() {
+  try {
+    stats = await req('GET', '/api/v1/users/me/stats');
+    renderAll(stats);
+  } catch (err) {
+    // Fallback: use /auth/me for basic info if stats endpoint not yet deployed
+    try {
+      const me = await api.auth.me();
+      renderBasic(me);
+    } catch (e) { toast('Could not load profile data', 'error'); }
+  }
+}
+
+function req(method, path) {
+  const token = sessionStorage.getItem('token');
+  return fetch('http://localhost:8001' + path, {
+    method,
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+  }).then(async r => {
+    if (!r.ok) throw new Error((await r.json())?.detail || 'Error');
+    return r.json();
+  });
+}
+
+function renderBasic(user) {
+  const initials = (user.full_name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('avatar-initials').textContent = initials;
+  document.getElementById('profile-name').textContent    = user.full_name || '—';
+  document.getElementById('profile-email').textContent   = user.email || '';
+  document.getElementById('profile-since').textContent   = 'Member since ' +
+    new Date(user.created_at).toLocaleDateString(undefined, { month:'long', year:'numeric' });
+  document.getElementById('settings-name').value  = user.full_name || '';
+  document.getElementById('settings-email').value = user.email || '';
+}
+
+function renderAll(s) {
+  renderBasic({ full_name: s.full_name, email: s.email, created_at: s.member_since });
+
+  // ── Overview stats ─────────────────────────────────────────────
+  const og = document.getElementById('overview-stats');
+  og.innerHTML = [
+    { num: s.total_agents,        label: 'Custom agents',      color: 'var(--violet-2)' },
+    { num: s.total_conversations, label: 'Conversations',       color: 'var(--text)' },
+    { num: s.total_messages,      label: 'Messages sent',       color: 'var(--text)' },
+    { num: s.prompts_improved,    label: 'Prompts improved',    color: 'var(--success)' },
+  ].map(item => `
+    <div class="stat-card">
+      <div class="stat-card-num" style="color:${item.color}">${item.num}</div>
+      <div class="stat-card-label">${item.label}</div>
+    </div>`).join('');
+
+  // ── Mini provider bar ──────────────────────────────────────────
+  const total = (s.groq_messages + s.ollama_messages) || 1;
+  const gPct  = Math.round((s.groq_messages / total) * 100);
+  const oPct  = Math.round((s.ollama_messages / total) * 100);
+
+  document.getElementById('provider-mini-bars').innerHTML = `
+    <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:var(--r-xl);padding:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <span style="font-size:14px;font-weight:600">Most used: <strong style="color:${s.most_used_provider==='Groq'?'var(--violet-2)':'var(--success)'}">${s.most_used_provider}</strong></span>
+        <span style="font-size:12px;color:var(--text-3);font-family:var(--font-mono)">${total} sessions tracked</span>
+      </div>
+      <div class="provider-bar-row">
+        <div class="provider-bar-label"><span>Groq cloud</span><span>${gPct}%</span></div>
+        <div class="provider-bar-track"><div class="provider-bar-fill bar-groq" style="width:0" data-target="${gPct}%"></div></div>
+      </div>
+      <div style="margin-top:12px" class="provider-bar-row">
+        <div class="provider-bar-label"><span>Ollama local</span><span>${oPct}%</span></div>
+        <div class="provider-bar-track"><div class="provider-bar-fill bar-ollama" style="width:0" data-target="${oPct}%"></div></div>
+      </div>
+    </div>`;
+
+  // Animate bars after paint
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.provider-bar-fill').forEach(el => {
+      el.style.width = el.dataset.target;
+    });
+  });
+
+  // ── Provider detail section ────────────────────────────────────
+  document.getElementById('provider-detail').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px">
+      <div style="background:rgba(124,109,240,0.06);border:1px solid rgba(124,109,240,0.2);border-radius:var(--r-xl);padding:24px;text-align:center">
+        <div style="font-family:var(--font-display);font-size:40px;font-weight:800;color:var(--violet-2);letter-spacing:-0.04em">${s.groq_messages}</div>
+        <div style="font-size:13px;color:var(--text-2);margin-top:6px">Groq sessions</div>
+        <div style="font-size:11px;color:var(--text-3);font-family:var(--font-mono);margin-top:3px">${gPct}% of total</div>
+      </div>
+      <div style="background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.2);border-radius:var(--r-xl);padding:24px;text-align:center">
+        <div style="font-family:var(--font-display);font-size:40px;font-weight:800;color:var(--success);letter-spacing:-0.04em">${s.ollama_messages}</div>
+        <div style="font-size:13px;color:var(--text-2);margin-top:6px">Ollama sessions</div>
+        <div style="font-size:11px;color:var(--text-3);font-family:var(--font-mono);margin-top:3px">${oPct}% of total</div>
+      </div>
+    </div>
+    <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:var(--r-xl);padding:20px">
+      <div style="font-size:13px;color:var(--text-2);line-height:1.7">
+        You have used <strong style="color:var(--text)">${s.most_used_provider}</strong> for the majority of your sessions.
+        ${s.ollama_messages === 0
+          ? ' You haven\'t used Ollama yet — <a href="help.html" style="color:var(--violet-2)">set it up locally</a> for unlimited private inference.'
+          : ' Switching between providers mid-conversation is fully supported with complete context sharing.'}
+      </div>
+    </div>`;
+
+  // ── Feedback section ───────────────────────────────────────────
+  const fbTotal = (s.thumbs_up + s.thumbs_down) || 1;
+  const upPct   = Math.round((s.thumbs_up / fbTotal) * 100);
+  const downPct = 100 - upPct;
+  const r = 40, circ = 2 * Math.PI * r;
+  const upArc   = (s.thumbs_up   / fbTotal) * circ;
+  const downArc = (s.thumbs_down / fbTotal) * circ;
+
+  document.getElementById('feedback-detail').innerHTML = `
+    <div class="feedback-ring-wrap">
+      <svg class="ring-svg" width="110" height="110" viewBox="0 0 110 110">
+        <circle cx="55" cy="55" r="${r}" fill="none" stroke="var(--ink-3)" stroke-width="12"/>
+        <circle cx="55" cy="55" r="${r}" fill="none" stroke="var(--danger)" stroke-width="12"
+          stroke-dasharray="${downArc} ${circ}" stroke-dashoffset="${circ * 0.25}"
+          stroke-linecap="round" transform="rotate(-90 55 55)"/>
+        <circle cx="55" cy="55" r="${r}" fill="none" stroke="var(--success)" stroke-width="12"
+          stroke-dasharray="${upArc} ${circ}" stroke-dashoffset="${circ * 0.25 + downArc}"
+          stroke-linecap="round" transform="rotate(-90 55 55)"/>
+        <text x="55" y="50" text-anchor="middle" font-family="var(--font-display)"
+          font-size="20" font-weight="800" fill="var(--text)">${s.satisfaction_score ?? '—'}${s.satisfaction_score != null ? '%' : ''}</text>
+        <text x="55" y="66" text-anchor="middle" font-family="var(--font-mono)"
+          font-size="9" fill="var(--text-3)">satisfaction</text>
+      </svg>
+      <div class="ring-legend">
+        <div class="ring-legend-item">
+          <div class="ring-dot" style="background:var(--success)"></div>
+          Thumbs up
+          <span class="ring-val">${s.thumbs_up}</span>
+        </div>
+        <div class="ring-legend-item">
+          <div class="ring-dot" style="background:var(--danger)"></div>
+          Thumbs down
+          <span class="ring-val">${s.thumbs_down}</span>
+        </div>
+        <div class="ring-legend-item">
+          <div class="ring-dot" style="background:var(--violet-2)"></div>
+          Prompts improved
+          <span class="ring-val">${s.prompts_improved}</span>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:var(--r-xl);padding:20px">
+      <p style="font-size:13.5px;color:var(--text-2);line-height:1.7">
+        You have submitted <strong style="color:var(--text)">${s.feedback_given}</strong> feedback ratings.
+        ${s.prompts_improved > 0
+          ? ` <strong style="color:var(--success)">${s.prompts_improved} prompt improvement${s.prompts_improved > 1 ? 's' : ''}</strong> have been applied to your agents, making future responses more accurate.`
+          : ' Use the <strong>Feedback</strong> button on your agent cards to review thumbs-down responses and apply AI-generated prompt improvements.'}
+      </p>
+    </div>`;
+}
+
+// ── Load agents for "My Agents" section ────────────────────────────
+async function loadAgents() {
+  try {
+    const all   = await api.agents.list();
+    const mine  = all.filter(a => !a.is_platform_agent);
+    const el    = document.getElementById('agents-list');
+
+    if (!mine.length) {
+      el.innerHTML = '<p style="color:var(--text-3);font-family:var(--font-mono);font-size:13px;padding:20px 0">No custom agents yet. <a href="create-agent.html" style="color:var(--violet-2)">Create your first one.</a></p>';
+      return;
+    }
+
+    el.innerHTML = mine.map(a => `
+      <div class="agent-row">
+        <div class="agent-row-name">${a.name}</div>
+        <span class="tag tag-user">Custom</span>
+        <div class="agent-row-meta" style="margin-left:auto">${a.description ? a.description.slice(0,40) + (a.description.length>40?'…':'') : 'No description'}</div>
+        <button class="btn btn-sm btn-primary" onclick="sessionStorage.setItem('active_agent_id','${a.id}');sessionStorage.setItem('active_agent_name','${a.name}');window.location.href='chat.html'">Chat</button>
+      </div>`).join('');
+  } catch (_) {}
+}
+
+// ── Load activity ──────────────────────────────────────────────────
+async function loadActivity() {
+  try {
+    const convs = await api.conversations.list();
+    const el    = document.getElementById('activity-list');
+
+    if (!convs.length) {
+      el.innerHTML = '<p style="color:var(--text-3);font-family:var(--font-mono);font-size:13px;padding:16px 0">No activity yet. Start a conversation to see it here.</p>';
+      return;
+    }
+
+    el.innerHTML = convs.slice(0, 10).map(c => {
+      const date = new Date(c.updated_at);
+      const rel  = (() => {
+        const diff = Date.now() - date.getTime();
+        const m = Math.floor(diff/60000), h = Math.floor(diff/3600000), d = Math.floor(diff/86400000);
+        if (m < 1) return 'just now';
+        if (m < 60) return m + 'm ago';
+        if (h < 24) return h + 'h ago';
+        return d + 'd ago';
+      })();
+      return `
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-body">
+            <div class="timeline-text">Conversation: <strong>${c.title || 'Untitled'}</strong></div>
+            <div class="timeline-time">${rel} · ${c.current_provider || 'groq'} provider</div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch (_) {}
+}
+
+// ── Settings ───────────────────────────────────────────────────────
+document.getElementById('save-name-btn')?.addEventListener('click', () => {
+  // Name update not yet in backend — show informational toast
+  toast('Name updated locally. Backend update coming in next release.', 'info');
+});
+
+document.getElementById('delete-account-btn')?.addEventListener('click', async () => {
+  const ok = await confirmDialog(
+    'Deactivate account',
+    'Your account will be permanently deactivated. You will be signed out and cannot sign back in. This cannot be undone.',
+    'Deactivate', true,
+  );
+  if (!ok) return;
+  try {
+    await req('DELETE', '/api/v1/users/me');
+    sessionStorage.clear();
+    toast('Account deactivated. Signing you out…', 'info');
+    setTimeout(() => window.location.href = '/index.html', 1500);
+  } catch (err) {
+    toast(err.message, 'error');
+  }
+});
+
+// ── Init ───────────────────────────────────────────────────────────
+loadStats();
+loadAgents();
+loadActivity();
+</script>
+<script type="module" src="js/animations.js"></script>
+</body>
+</html>

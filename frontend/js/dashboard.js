@@ -5,7 +5,6 @@ if (!sessionStorage.getItem('token')) window.location.href = '/index.html';
 
 const platformGrid = document.getElementById('platform-agents');
 const userGrid     = document.getElementById('user-agents');
-const userNameEl   = document.getElementById('user-name');
 
 document.getElementById('logout-btn')?.addEventListener('click', () => {
   sessionStorage.clear(); window.location.href = '/index.html';
@@ -178,7 +177,15 @@ async function loadAgents() {
 }
 
 async function loadUser() {
-  try { const u = await api.auth.me(); if (userNameEl) userNameEl.textContent = u.full_name; } catch (_) {}
+  try {
+    const u = await api.auth.me();
+    const name = u.full_name || u.email || 'User';
+    const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    const nameEl   = document.getElementById('user-name');
+    const avatarEl = document.getElementById('user-avatar');
+    if (nameEl)   nameEl.textContent   = name.split(' ')[0]; // first name only
+    if (avatarEl) avatarEl.textContent = initials;
+  } catch (_) {}
 }
 
 loadUser(); loadAgents();
