@@ -6,7 +6,10 @@ async function req(method, path, body = null, auth = true) {
   const opts = { method, headers: auth ? authH() : { 'Content-Type': 'application/json' } };
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(`${BASE}${path}`, opts);
-  if (res.status === 401) { sessionStorage.clear(); window.location.href = '/index.html'; return; }
+  if (res.status === 401 && auth) {
+    // Only redirect on 401 for authenticated requests, not public endpoints
+    sessionStorage.clear(); window.location.href = '/index.html'; return;
+  }
   const data = res.status !== 204 ? await res.json() : null;
   if (!res.ok) {
     const msg = data?.detail || 'Something went wrong';
