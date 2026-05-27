@@ -15,20 +15,20 @@ document.getElementById('back-btn')?.addEventListener('click', () => {
 
 // ── Model definitions ─────────────────────────────────────────────
 const GROQ_MODELS = [
-  { id: 'llama-3.3-70b-versatile', name: 'LLaMA 3.3',  detail: '70B · Best quality',  provider: 'groq'   },
-  { id: 'llama-3.1-8b-instant',    name: 'LLaMA 3.1',  detail: '8B · Fastest',         provider: 'groq'   },
-  { id: 'mixtral-8x7b-32768',      name: 'Mixtral',    detail: '8×7B · 32k context',   provider: 'groq'   },
-  { id: 'gemma2-9b-it',            name: 'Gemma 2',    detail: '9B · Efficient',        provider: 'groq'   },
+  { id: 'llama-3.3-70b-versatile', name: 'LLaMA 3.3', detail: '70B · Best quality', provider: 'groq' },
+  { id: 'llama-3.1-8b-instant', name: 'LLaMA 3.1', detail: '8B · Fastest', provider: 'groq' },
+  { id: 'mixtral-8x7b-32768', name: 'Mixtral', detail: '8×7B · 32k context', provider: 'groq' },
+  { id: 'gemma2-9b-it', name: 'Gemma 2', detail: '9B · Efficient', provider: 'groq' },
 ];
 const OLLAMA_MODELS = [
-  { id: 'llama3.2',    name: 'LLaMA 3.2',  detail: 'Local · No rate limits', provider: 'ollama' },
-  { id: 'llama3.1:8b', name: 'LLaMA 3.1',  detail: 'Local · 8B · Fast',      provider: 'ollama' },
-  { id: 'mistral',     name: 'Mistral 7B', detail: 'Local · 7B · Balanced',  provider: 'ollama' },
-  { id: 'phi3:mini',   name: 'Phi-3 Mini', detail: 'Local · Lightweight',    provider: 'ollama' },
+  { id: 'llama3.2', name: 'LLaMA 3.2', detail: 'Local · No rate limits', provider: 'ollama' },
+  { id: 'llama3.1:8b', name: 'LLaMA 3.1', detail: 'Local · 8B · Fast', provider: 'ollama' },
+  { id: 'mistral', name: 'Mistral 7B', detail: 'Local · 7B · Balanced', provider: 'ollama' },
+  { id: 'phi3:mini', name: 'Phi-3 Mini', detail: 'Local · Lightweight', provider: 'ollama' },
 ];
 const TOOLS = [
-  { name: 'web_search',    label: 'Web Search'    },
-  { name: 'calculator',    label: 'Calculator'    },
+  { name: 'web_search', label: 'Web Search' },
+  { name: 'calculator', label: 'Calculator' },
   { name: 'code_executor', label: 'Code Executor' },
 ];
 
@@ -77,7 +77,7 @@ function renderModels() {
     radio.addEventListener('change', () => {
       if (radio.checked) {
         div.querySelector('.model-lbl').style.borderColor = 'rgba(74,222,128,0.5)';
-        div.querySelector('.model-lbl').style.background  = 'rgba(74,222,128,0.06)';
+        div.querySelector('.model-lbl').style.background = 'rgba(74,222,128,0.06)';
       }
     });
     modelGrid.appendChild(div);
@@ -97,37 +97,47 @@ TOOLS.forEach(t => {
 
 // ── Prompt counter ────────────────────────────────────────────────
 const promptEl = document.getElementById('agent-prompt');
-const countEl  = document.getElementById('prompt-count');
+const countEl = document.getElementById('prompt-count');
 promptEl?.addEventListener('input', () => {
   if (countEl) countEl.textContent = promptEl.value.length + ' chars';
 });
 
 // ── Get selected model ────────────────────────────────────────────
 function getSelectedModel() {
-  const radio = document.querySelector('input[name="model"]:checked');
-  if (!radio) return null;
-  return { id: radio.value, provider: radio.dataset.provider };
+  const select = document.getElementById('model-select');
+  if (!select || !select.value) return null;
+  const option = select.options[select.selectedIndex];
+  const provider = option.getAttribute('data-provider');
+  if (!provider) return null;
+  return {
+    id: select.value,
+    provider: provider,
+  };
 }
 
 // ── Resolve model UUID at submit time (not on page load) ──────────
 // This is the key fix: we only call the API when the user clicks
 // Create, not on page load. This prevents any redirect on arrival.
 async function resolveModelUUID(selected) {
-  // Try the public models endpoint first
+  const token = sessionStorage.getItem('token'); // Grab the token first
+
+  // Try the models endpoint first
   try {
-    const models = await fetch('http://localhost:8001/api/v1/models').then(r => r.json());
+    const models = await fetch('http://localhost:8001/api/v1/models', {
+      headers: { 'Authorization': `Bearer ${token}` } // Attach token here
+    }).then(r => r.json());
+
     if (Array.isArray(models)) {
       for (const m of models) {
-        if (selected.provider === 'groq'   && m.groq_model_id   === selected.id) return m.id;
+        if (selected.provider === 'groq' && m.groq_model_id === selected.id) return m.id;
         if (selected.provider === 'ollama' && m.ollama_model_id === selected.id) return m.id;
       }
     }
-  } catch (_) {}
+  } catch (_) { }
 
   // Fallback: infer from platform agents
   try {
-    const token   = sessionStorage.getItem('token');
-    const agents  = await fetch('http://localhost:8001/api/v1/agents', {
+    const agents = await fetch('http://localhost:8001/api/v1/agents', {
       headers: { 'Authorization': `Bearer ${token}` }
     }).then(r => r.json());
 
@@ -136,14 +146,14 @@ async function resolveModelUUID(selected) {
         if (!a.is_platform_agent) continue;
         const n = (a.name || '').toLowerCase();
         let gid = null;
-        if (n.includes('llama') && n.includes('70'))    gid = 'llama-3.3-70b-versatile';
+        if (n.includes('llama') && n.includes('70')) gid = 'llama-3.3-70b-versatile';
         else if (n.includes('llama') && n.includes('8')) gid = 'llama-3.1-8b-instant';
-        else if (n.includes('mixtral'))                  gid = 'mixtral-8x7b-32768';
-        else if (n.includes('gemma'))                    gid = 'gemma2-9b-it';
+        else if (n.includes('mixtral')) gid = 'mixtral-8x7b-32768';
+        else if (n.includes('gemma')) gid = 'gemma2-9b-it';
         if (gid === selected.id) return a.model_id;
       }
     }
-  } catch (_) {}
+  } catch (_) { }
 
   return null;
 }
@@ -152,14 +162,14 @@ async function resolveModelUUID(selected) {
 document.getElementById('create-form')?.addEventListener('submit', async e => {
   e.preventDefault();
   const errEl = document.getElementById('form-error');
-  const btn   = e.target.querySelector('button[type=submit]');
+  const btn = e.target.querySelector('button[type=submit]');
   errEl.textContent = '';
 
-  const name          = document.getElementById('agent-name').value.trim();
-  const description   = document.getElementById('agent-desc').value.trim();
+  const name = document.getElementById('agent-name').value.trim();
+  const description = document.getElementById('agent-desc').value.trim();
   const system_prompt = promptEl?.value.trim();
-  const selected      = getSelectedModel();
-  const tools         = Array.from(
+  const selected = getSelectedModel();
+  const tools = Array.from(
     toolsGrid?.querySelectorAll('input:checked') || []
   ).map(cb => ({ tool_name: cb.value, tool_config: {} }));
 

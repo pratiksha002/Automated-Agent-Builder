@@ -59,9 +59,22 @@
       </div>
 
       <div class="form-group">
-        <label>Model</label>
-        <div class="model-grid" id="model-grid"></div>
-        <small>Select the model that best fits your agent's purpose. LLaMA 3.3 70B is recommended for most use cases.</small>
+        <label for="model-select">Model</label>
+        <select id="model-select">
+          <optgroup label="Groq — Cloud (fast, requires API key)">
+            <option value="llama-3.3-70b-versatile" data-provider="groq" selected>LLaMA 3.3 70B — Best quality</option>
+            <option value="llama-3.1-8b-instant"    data-provider="groq">LLaMA 3.1 8B — Fastest</option>
+            <option value="mixtral-8x7b-32768"       data-provider="groq">Mixtral 8x7B — 32k context</option>
+            <option value="gemma2-9b-it"             data-provider="groq">Gemma 2 9B — Efficient</option>
+          </optgroup>
+          <optgroup label="Ollama — Local (no rate limits, requires Ollama installed)">
+            <option value="llama3.2"    data-provider="ollama">LLaMA 3.2 — Local · No rate limits</option>
+            <option value="llama3.1:8b" data-provider="ollama">LLaMA 3.1 8B — Local · Fast</option>
+            <option value="mistral"     data-provider="ollama">Mistral 7B — Local · Balanced</option>
+            <option value="phi3:mini"   data-provider="ollama">Phi-3 Mini — Local · Lightweight</option>
+          </optgroup>
+        </select>
+        <small>LLaMA 3.3 70B is recommended for most use cases.</small>
       </div>
 
       <div class="form-group">
