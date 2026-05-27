@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8001';
+const BASE_URL = 'https://agent-builder-api.onrender.com';
 
 function getAdminToken() {
   return sessionStorage.getItem('admin_token');
