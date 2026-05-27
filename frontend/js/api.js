@@ -1,4 +1,4 @@
-const BASE = 'https://agent-builder-api.onrender.com';
+const BASE = 'https://automated-agent-builder.onrender.com';
 const token = () => sessionStorage.getItem('token');
 const authH = () => ({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${token()}` });
 

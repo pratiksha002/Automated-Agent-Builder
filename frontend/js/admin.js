@@ -1,4 +1,4 @@
-const BASE_URL = 'https://agent-builder-api.onrender.com';
+const BASE_URL = 'https://automated-agent-builder.onrender.com';
 
 function getAdminToken() {
   return sessionStorage.getItem('admin_token');
