@@ -31,18 +31,19 @@ logger = logging.getLogger(__name__)
 app = FastAPI(title=settings.APP_NAME, docs_url="/docs", redoc_url="/redoc")
 app.state.limiter = limiter
 
-origins=[
-        "https://automated-agent-builder.vercel.app",
-        "http://localhost:8000",
-        "http://localhost:3000",
-        "http://127.0.0.1:5500"  # For VS Code Live Server if you use it
-    ],
-
 # ── CORS ──────────────────────────────────────────────────────────────────────
+# Clean list of explicit domains (No trailing comma after the closing bracket!)
+origins = [
+    "https://automated-agent-builder.vercel.app",
+    "http://localhost:8000",
+    "http://localhost:3000",
+    "http://127.0.0.1:5500"
+]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"https://automated-agent-builder-.*\.vercel\.app", # Allows all Vercel preview domains
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
