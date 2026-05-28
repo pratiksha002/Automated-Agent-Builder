@@ -378,7 +378,7 @@ async function loadStats() {
 
 function req(method, path) {
   const token = sessionStorage.getItem('token');
-  return fetch('http://localhost:8001' + path, {
+  return fetch('https://automated-agent-builder.onrender.com' + path, {
     method,
     headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
   }).then(async r => {

@@ -52,7 +52,7 @@ function getSelectedModel() {
 // ── Resolve model UUID ────────────────────────────────────────────
 async function resolveModelUUID(selected) {
   try {
-    const models = await fetch('http://localhost:8001/api/v1/models').then(r => r.json());
+    const models = await fetch('https://automated-agent-builder.onrender.com/api/v1/models').then(r => r.json());
     if (Array.isArray(models)) {
       for (const m of models) {
         if (selected.provider === 'groq'   && m.groq_model_id   === selected.id) return m.id;
@@ -63,7 +63,7 @@ async function resolveModelUUID(selected) {
 
   try {
     const token  = sessionStorage.getItem('token');
-    const agents = await fetch('http://localhost:8001/api/v1/agents', {
+    const agents = await fetch('https://automated-agent-builder.onrender.com/api/v1/agents', {
       headers: { 'Authorization': `Bearer ${token}` }
     }).then(r => r.json());
 

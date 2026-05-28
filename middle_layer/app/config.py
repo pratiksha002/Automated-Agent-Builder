@@ -2,9 +2,9 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    BACKEND_URL: str = "http://localhost:8000"
+    BACKEND_URL: str = "https://automated-agent-builder.onrender.com"
     SECRET_KEY: str
-    ALLOWED_ORIGINS: str = "http://localhost:3000"
+    ALLOWED_ORIGINS: str = "https://automated-agent-builder.vercel.app/, http://localhost:8000, http://localhost:3000, http://127.0.0.1:5500"
     RATE_LIMIT: str = "60/minute"
     APP_NAME: str = "Automated Agent Builder - Gateway"
 
